@@ -1,0 +1,18 @@
+/* static/css/styles.css */
+body {
+    font-family: Arial, sans-serif;
+}
+.sidebar a:hover svg {
+    color: #ffffff;
+}
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+th, td {
+    padding: 8px;
+    text-align: left;
+}
+th {
+    background-color: #f5f5f5;
+}

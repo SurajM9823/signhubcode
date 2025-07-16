@@ -1,0 +1,36 @@
+<!-- templates/base_public.html -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SignHub - {% block title %}{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <!-- Include Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Include reusable AJAX script -->
+    <script src="{% static 'js/ajax-form.js' %}"></script>
+</head>
+<body class="bg-gray-100">
+    <!-- Toast Notification Container -->
+    <div x-data="{ show: false, message: '', type: 'success' }"
+         x-show="show"
+         x-transition
+         x-init="$watch('show', value => { if (value) setTimeout(() => show = false, 3000) })"
+         :class="{
+             'bg-green-500': type === 'success',
+             'bg-red-500': type === 'error'
+         }"
+         class="fixed top-4 right-4 text-white px-4 py-3 rounded shadow-lg z-50">
+        <p x-text="message"></p>
+    </div>
+
+    <div class="">
+        {% block content %}
+        {% endblock %}
+    </div>
+</body>
+</html>

@@ -1,0 +1,94 @@
+{% extends 'base_authenticated.html' %}
+{% load static %}
+
+{% block title %}Clients{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto" x-data="{ showForm: {{ edit_mode|yesno:'true,false' }} }">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold">Client Management</h1>
+        <button @click="showForm = !showForm"
+                class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
+            <span x-show="!showForm">+ Add Client</span>
+            <span x-show="showForm">– Cancel</span>
+        </button>
+    </div>
+
+    <!-- Client Form (Add or Edit) -->
+    <div x-show="showForm" x-transition
+         class="bg-white p-6 rounded-lg shadow-md mb-6">
+        <h2 class="text-xl font-semibold mb-4" x-text="{{ edit_mode|yesno:'\'Edit Client\',\'Add New Client\'' }}"></h2>
+        <form method="post" class="space-y-4" action="{% if edit_mode %}{% url 'client_list' client_id %}{% else %}{% url 'client_list' %}{% endif %}">
+            {% csrf_token %}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Name</label>
+                    {{ form.name }}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Email</label>
+                    {{ form.email }}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Phone</label>
+                    {{ form.phone }}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Address</label>
+                    {{ form.address }}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Tax ID</label>
+                    {{ form.tax_id }}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Last Payment Date</label>
+                    {{ form.last_payment_date }}
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700">Notes</label>
+                    {{ form.notes }}
+                </div>
+            </div>
+            <button type="submit"
+                    class="mt-4 w-full bg-green-600 text-white p-2 rounded-md hover:bg-green-700 transition"
+                    x-text="{{ edit_mode|yesno:'\'Save Changes\',\'Save Client\'' }}">
+            </button>
+        </form>
+    </div>
+
+    <!-- Client List -->
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        <h2 class="text-xl font-semibold mb-4">Client List</h2>
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tax ID</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Dues</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for client in clients %}
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ client.name }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ client.email }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ client.tax_id }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${{ client.total_dues|floatformat:2 }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <a href="{% url 'client_list' client.pk %}" class="text-indigo-600 hover:text-indigo-900">Edit</a>
+                        <a href="#" class="ml-4 text-red-600 hover:text-red-900">Delete</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="px-6 py-4 text-center">No clients available.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

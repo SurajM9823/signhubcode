@@ -1,0 +1,233 @@
+{% extends 'base_authenticated.html' %}
+{% load static %}
+
+{% block title %}Dues{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto" x-data="{
+    showForm: {{ edit_mode|yesno:'true,false' }},
+    showMarkPaidForm: false,
+    totalPendingAmount: 0,
+    showDetailsModal: false,
+    selectedClient: null,
+    clientDues: [],
+    clientTotalDues: 0,
+    clientTotalPaid: 0,
+    clientTotalRemaining: 0
+}">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold">Dues Management</h1>
+        <button @click="showForm = !showForm"
+                class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
+            <span x-show="!showForm">+ Add Dues</span>
+            <span x-show="showForm">– Cancel</span>
+        </button>
+    </div>
+
+    <!-- Dues Form (Add or Edit) -->
+    <div x-show="showForm" x-transition
+         class="bg-white p-6 rounded-lg shadow-md mb-6">
+        <h2 class="text-xl font-semibold mb-4" x-text="{{ edit_mode|yesno:'\'Edit Dues\',\'Add New Dues\'' }}"></h2>
+        <form method="post" class="space-y-4" action="{% if edit_mode %}{% url 'dues_list' dues_id %}{% else %}{% url 'dues_list' %}{% endif %}">
+            {% csrf_token %}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Client</label>
+                    {{ form.client }}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Amount</label>
+                    {{ form.amount }}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Due Date</label>
+                    {{ form.due_date }}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Status</label>
+                    {{ form.status }}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Payment Date</label>
+                    {{ form.payment_date }}
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700">Description</label>
+                    {{ form.description }}
+                </div>
+            </div>
+            <button type="submit"
+                    class="mt-4 w-full bg-green-600 text-white p-2 rounded-md hover:bg-green-700 transition"
+                    x-text="{{ edit_mode|yesno:'\'Save Changes\',\'Save Dues\'' }}">
+            </button>
+        </form>
+    </div>
+
+    <!-- Mark Paid Form -->
+    <div x-show="showMarkPaidForm" x-transition
+         class="bg-white p-6 rounded-lg shadow-md mb-6">
+        <h2 class="text-xl font-semibold mb-4">Record Payment</h2>
+        <form method="post" class="space-y-4" action="{% url 'dues_list' %}" @submit="if (!payment_amount || payment_amount <= 0 || payment_amount > totalPendingAmount) { $event.preventDefault(); alert('Payment amount must be a positive number and not exceed the total pending amount.'); }">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="mark_paid">
+            <input type="hidden" name="client_id" x-model="selectedClient ? selectedClient.id : ''">
+            <div class="grid grid-cols-1 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Total Amount to Pay</label>
+                    <input type="text" :value="totalPendingAmount.toFixed(2)" class="border rounded p-2 w-full" disabled>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Payment Amount</label>
+                    <input type="number" name="payment_amount" x-model.number="totalPendingAmount" step="0.01" min="0.01" :max="totalPendingAmount" class="border rounded p-2 w-full" required>
+                </div>
+            </div>
+            <button type="submit" class="mt-4 w-full bg-green-600 text-white p-2 rounded-md hover:bg-green-700 transition">Record Payment</button>
+            <button @click="showMarkPaidForm = false" type="button" class="mt-2 w-full bg-red-600 text-white p-2 rounded-md hover:bg-red-700 transition">Cancel</button>
+        </form>
+    </div>
+
+    <!-- Details Modal -->
+    <div x-show="showDetailsModal" x-transition
+         class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-lg max-w-4xl w-full p-6 max-h-[80vh] overflow-y-auto">
+            <h2 class="text-xl font-semibold mb-4">Dues Details for <span x-text="selectedClient ? selectedClient.name : ''"></span></h2>
+            
+            <!-- Summary -->
+            <div class="mb-6">
+                <h3 class="text-lg font-medium mb-2">Summary</h3>
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Dues</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Paid</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Remaining</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">$<span x-text="clientTotalDues.toFixed(2)"></span></td>
+                            <td class="px-6 py-4 whitespace-nowrap">$<span x-text="clientTotalPaid.toFixed(2)"></span></td>
+                            <td class="px-6 py-4 whitespace-nowrap">$<span x-text="clientTotalRemaining.toFixed(2)"></span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Dues Records -->
+            <div class="mb-6">
+                <h3 class="text-lg font-medium mb-2">Dues Records</h3>
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Paid Amount</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Remaining Amount</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <template x-for="due in clientDues" :key="due.id">
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap" x-text="due.description || '—'"></td>
+                                <td class="px-6 py-4 whitespace-nowrap">$<span x-text="due.amount.toFixed(2)"></span></td>
+                                <td class="px-6 py-4 whitespace-nowrap">$<span x-text="due.paid_amount.toFixed(2)"></span></td>
+                                <td class="px-6 py-4 whitespace-nowrap">$<span x-text="due.remaining_amount.toFixed(2)"></span></td>
+                                <td class="px-6 py-4 whitespace-nowrap" x-text="due.due_date"></td>
+                                <td class="px-6 py-4 whitespace-nowrap" x-text="due.payment_date || '—'"></td>
+                                <td class="px-6 py-4 whitespace-nowrap" x-text="due.status"></td>
+                            </tr>
+                        </template>
+                        <tr x-show="!clientDues.length">
+                            <td colspan="7" class="px-6 py-4 text-center">No dues records available.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <button @click="showDetailsModal = false" class="mt-4 w-full bg-red-600 text-white p-2 rounded-md hover:bg-red-700 transition">Close</button>
+        </div>
+    </div>
+
+    <!-- Dues List -->
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        <h2 class="text-xl font-semibold mb-4">Dues List</h2>
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Amount</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Paid</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Remaining</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Latest Due Date</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Latest Payment Date</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for data in client_data %}
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ data.client.name }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${{ data.total_dues|floatformat:2 }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${{ data.total_paid|floatformat:2 }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${{ data.total_remaining|floatformat:2 }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ data.latest_due_date }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ data.status }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ data.latest_payment_date|default:"—" }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <a href="#" @click.prevent="showDetailsModal = true; 
+                            selectedClient = { 
+                                id: '{{ data.client.id }}',
+                                name: '{{ data.client.name|escapejs }}', 
+                                registration_date: '{{ data.client.registration_date }}' 
+                            }; 
+                            clientDues = [
+                                {% for d in data.client.dues_records.all %}
+                                { 
+                                    id: '{{ d.pk }}',
+                                    description: '{{ d.description|escapejs }}', 
+                                    amount: {{ d.amount }}, 
+                                    paid_amount: {{ d.paid_amount }}, 
+                                    remaining_amount: {{ d.remaining_amount }}, 
+                                    due_date: '{{ d.due_date }}', 
+                                    payment_date: '{{ d.payment_date|default:"—" }}', 
+                                    status: '{{ d.status }}' 
+                                }{% if not forloop.last %},{% endif %}
+                                {% endfor %}
+                            ]; 
+                            clientTotalDues = clientDues.reduce((sum, d) => sum + d.amount, 0);
+                            clientTotalPaid = clientDues.reduce((sum, d) => sum + d.paid_amount, 0);
+                            clientTotalRemaining = clientDues.reduce((sum, d) => sum + d.remaining_amount, 0);" 
+                            class="text-blue-600 hover:text-blue-900">Details</a>
+                        <a href="{% url 'dues_list' data.latest_due_id %}" class="ml-4 text-indigo-600 hover:text-indigo-900">Edit</a>
+                        {% if data.status != 'Paid' %}
+                        <a href="#" @click.prevent="showMarkPaidForm = true; 
+                            totalPendingAmount = {{ data.total_pending_amount|floatformat:2 }};
+                            selectedClient = { 
+                                id: '{{ data.client.id }}',
+                                name: '{{ data.client.name|escapejs }}', 
+                                registration_date: '{{ data.client.registration_date }}' 
+                            };" 
+                            class="ml-4 text-green-600 hover:text-green-900">Mark Paid</a>
+                        {% endif %}
+                        <form method="post" action="{% url 'dues_list' %}" class="inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="delete">
+                            <input type="hidden" name="dues_id" value="{{ data.latest_due_id }}">
+                            <button type="submit" class="ml-4 text-red-600 hover:text-red-900">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="px-6 py-4 text-center">No dues available.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

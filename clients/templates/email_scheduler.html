@@ -1,0 +1,227 @@
+{% extends 'base_authenticated.html' %}
+{% load static %}
+
+{% block title %}Email Scheduler{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto" x-data="{
+    showCredentialsForm: false,
+    showTemplateForm: false,
+    showScheduleForm: false,
+    showManualEmailForm: false
+}">
+    <h1 class="text-3xl font-bold mb-6">Email Scheduler</h1>
+
+    <!-- Email Credentials Section -->
+    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">Email Credentials</h2>
+            <button @click="showCredentialsForm = !showCredentialsForm"
+                    class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
+                <span x-show="!showCredentialsForm">+ Add Credentials</span>
+                <span x-show="showCredentialsForm">– Cancel</span>
+            </button>
+        </div>
+        <div x-show="showCredentialsForm" x-transition>
+            <form method="post" class="space-y-4">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="add_credentials">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {{ credentials_form.as_p }}
+                </div>
+                <button type="submit" class="mt-4 w-full bg-green-600 text-white p-2 rounded-md hover:bg-green-700 transition">Save Credentials</button>
+            </form>
+        </div>
+        <table class="min-w-full divide-y divide-gray-200 mt-4">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sender Email</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SMTP Server</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for cred in credentials %}
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ cred.sender_email }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ cred.smtp_server }}:{{ cred.smtp_port }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <form method="post" class="inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="delete_credentials">
+                            <input type="hidden" name="credentials_id" value="{{ cred.id }}">
+                            <button type="submit" class="text-red-600 hover:text-red-900">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="px-6 py-4 text-center">No credentials configured.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Email Templates Section -->
+    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">Email Templates</h2>
+            <button @click="showTemplateForm = !showTemplateForm"
+                    class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
+                <span x-show="!showTemplateForm">+ Add Template</span>
+                <span x-show="showTemplateForm">– Cancel</span>
+            </button>
+        </div>
+        <div x-show="showTemplateForm" x-transition>
+            <form method="post" class="space-y-4">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="add_template">
+                <div class="grid grid-cols-1 gap-4">
+                    {{ template_form.as_p }}
+                </div>
+                <button type="submit" class="mt-4 w-full bg-green-600 text-white p-2 rounded-md hover:bg-green-700 transition">Save Template</button>
+            </form>
+        </div>
+        <table class="min-w-full divide-y divide-gray-200 mt-4">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for template in templates %}
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ template.name }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ template.subject }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <form method="post" class="inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="delete_template">
+                            <input type="hidden" name="template_id" value="{{ template.id }}">
+                            <button type="submit" class="text-red-600 hover:text-red-900">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="px-6 py-4 text-center">No templates configured.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Email Schedules Section -->
+    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">Email Schedules</h2>
+            <button @click="showScheduleForm = !showScheduleForm"
+                    class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
+                <span x-show="!showScheduleForm">+ Add Schedule</span>
+                <span x-show="showScheduleForm">– Cancel</span>
+            </button>
+        </div>
+        <div x-show="showScheduleForm" x-transition>
+            <form method="post" class="space-y-4">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="add_schedule">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {{ schedule_form.as_p }}
+                </div>
+                <button type="submit" class="mt-4 w-full bg-green-600 text-white p-2 rounded-md hover:bg-green-700 transition">Save Schedule</button>
+            </form>
+        </div>
+        <table class="min-w-full divide-y divide-gray-200 mt-4">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Template</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Frequency</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Scheduled Time</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Active</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for schedule in schedules %}
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ schedule.client.name|default:"All Clients" }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ schedule.template.name }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ schedule.get_frequency_display }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ schedule.scheduled_time }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ schedule.is_active|yesno:"Yes,No" }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <form method="post" class="inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="delete_schedule">
+                            <input type="hidden" name="schedule_id" value="{{ schedule.id }}">
+                            <button type="submit" class="text-red-600 hover:text-red-900">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="px-6 py-4 text-center">No schedules configured.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Manual Email Section -->
+    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">Send Manual Email</h2>
+            <button @click="showManualEmailForm = !showManualEmailForm"
+                    class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
+                <span x-show="!showManualEmailForm">+ Send Email</span>
+                <span x-show="showManualEmailForm">– Cancel</span>
+            </button>
+        </div>
+        <div x-show="showManualEmailForm" x-transition>
+            <form method="post" class="space-y-4">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="send_manual_email">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {{ manual_email_form.as_p }}
+                </div>
+                <button type="submit" class="mt-4 w-full bg-green-600 text-white p-2 rounded-md hover:bg-green-700 transition">Send Email</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Email Logs Section -->
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        <h2 class="text-xl font-semibold mb-4">Email Logs</h2>
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Template</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sent At</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for log in logs %}
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ log.client.name }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ log.template.name|default:"—" }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ log.subject }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ log.sent_at }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ log.status }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="px-6 py-4 text-center">No email logs available.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

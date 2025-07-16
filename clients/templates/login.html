@@ -1,0 +1,92 @@
+<!-- templates/login.html -->
+{% extends 'base_public.html' %}
+{% load static %}
+
+{% block meta %}
+  {% block title %}Login{% endblock %}
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex flex-col justify-center relative" style="background: linear-gradient(#00c6a7, #082a68) fixed;">
+  <div class="absolute inset-0 z-0">
+    <!-- Particle background placeholder -->
+  </div>
+
+  <div class="sm:mx-auto sm:w-full sm:max-w-md lg:mx-auto relative z-10">
+    <div
+      class="py-6 px-4 mx-5 lg:mx-auto shadow-lg sm:rounded-lg rounded-lg sm:px-8 lg:w-96"
+      style="background: linear-gradient(135deg, #e0f7f4, #ffffff); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);"
+    >
+      <div class="sm:mx-auto sm:w-full sm:max-w-md">
+        <div class="flex justify-center">
+          <img class="h-20 w-auto" src="{% static 'images/logo.png' %}" alt="Logo" />
+        </div>
+        <h1 class="text-center text-xl font-extrabold text-primary">Signhub Pvt. Ltd</h1>
+        <h3 class="text-center text-xs font-medium text-gray-600 mb-4">Sign in to your account</h3>
+      </div>
+
+      <form method="post" class="space-y-6">
+        {% csrf_token %}
+
+        <div>
+          <div class="mt-1 relative rounded-md shadow-sm">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <img src="{% static 'images/gmail-icon.png' %}" class="h-5 w-4 text-gray-400" alt="Email Icon" />
+            </div>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              autocomplete="email"
+              required
+              class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+              placeholder="Email address"
+              autofocus
+            />
+          </div>
+        </div>
+
+        <div>
+          <div class="mt-1 relative rounded-md shadow-sm">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <img src="{% static 'images/lock-icon.png' %}" class="h-5 w-5 text-gray-400" alt="Password Icon" />
+            </div>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              autocomplete="current-password"
+              required
+              class="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+              placeholder="Password"
+            />
+          </div>
+        </div>
+
+        {% if error %}
+          <div class="rounded-md bg-red-50 p-4">
+            <div class="flex">
+              <div class="ml-3">
+                <h3 class="text-sm font-medium text-red-800">{{ error }}</h3>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+
+        <div>
+          <button
+            type="submit"
+            class="w-full btn text-gray-950 border bg-primary hover:bg-darkPrimary hover:text-gray-50 focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+          >
+            Sign in
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <div class="mt-10 text-center text-sm text-gray-300 relative z-10">
+      © {{ year|default:2025 }} Office Management System. All rights reserved.
+    </div>
+  </div>
+</div>
+{% endblock %}

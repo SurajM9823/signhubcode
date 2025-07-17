@@ -6,89 +6,221 @@
 {% block content %}
 <div class="max-w-7xl mx-auto" x-data="{ showForm: {{ edit_mode|yesno:'true,false' }} }">
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold">Client Management</h1>
+        <h1 class="text-3xl font-bold text-gray-800">Client Management</h1>
         <button @click="showForm = !showForm"
-                class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
-            <span x-show="!showForm">+ Add Client</span>
-            <span x-show="showForm">– Cancel</span>
+                class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition flex items-center">
+            <svg x-show="!showForm" class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+            <svg x-show="showForm" class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            <span x-show="!showForm">Add Client</span>
+            <span x-show="showForm">Cancel</span>
         </button>
     </div>
 
     <!-- Client Form (Add or Edit) -->
     <div x-show="showForm" x-transition
          class="bg-white p-6 rounded-lg shadow-md mb-6">
-        <h2 class="text-xl font-semibold mb-4" x-text="{{ edit_mode|yesno:'\'Edit Client\',\'Add New Client\'' }}"></h2>
+        <h2 class="text-xl font-semibold mb-4 text-gray-800" x-text="{{ edit_mode|yesno:'\'Edit Client\',\'Add New Client\'' }}"></h2>
+        
+        {% if form.errors %}
+        <div class="mb-4 p-4 bg-red-50 border-l-4 border-red-500 text-red-700">
+            <p class="font-medium">Please correct the following errors:</p>
+            <ul class="list-disc pl-5 mt-2">
+                {% for field in form %}
+                    {% for error in field.errors %}
+                    <li>{{ field.label }}: {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        
         <form method="post" class="space-y-4" action="{% if edit_mode %}{% url 'client_list' client_id %}{% else %}{% url 'client_list' %}{% endif %}">
             {% csrf_token %}
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Name</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Name *</label>
                     {{ form.name }}
+                    {% if form.name.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ form.name.errors.0 }}</p>
+                    {% endif %}
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Email</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
                     {{ form.email }}
+                    {% if form.email.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ form.email.errors.0 }}</p>
+                    {% endif %}
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Phone</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
                     {{ form.phone }}
+                    {% if form.phone.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ form.phone.errors.0 }}</p>
+                    {% endif %}
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Address</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
                     {{ form.address }}
+                    {% if form.address.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ form.address.errors.0 }}</p>
+                    {% endif %}
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Tax ID</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tax ID *</label>
                     {{ form.tax_id }}
+                    {% if form.tax_id.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ form.tax_id.errors.0 }}</p>
+                    {% endif %}
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Last Payment Date</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Last Payment Date</label>
                     {{ form.last_payment_date }}
+                    {% if form.last_payment_date.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ form.last_payment_date.errors.0 }}</p>
+                    {% endif %}
                 </div>
                 <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700">Notes</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
                     {{ form.notes }}
+                    {% if form.notes.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ form.notes.errors.0 }}</p>
+                    {% endif %}
                 </div>
             </div>
             <button type="submit"
-                    class="mt-4 w-full bg-green-600 text-white p-2 rounded-md hover:bg-green-700 transition"
-                    x-text="{{ edit_mode|yesno:'\'Save Changes\',\'Save Client\'' }}">
+                    class="mt-4 w-full bg-green-600 text-white p-2 rounded-md hover:bg-green-700 transition flex justify-center items-center">
+                <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span x-text="{{ edit_mode|yesno:'\'Save Changes\',\'Save Client\'' }}"></span>
             </button>
         </form>
     </div>
 
     <!-- Client List -->
     <div class="bg-white p-6 rounded-lg shadow-md">
-        <h2 class="text-xl font-semibold mb-4">Client List</h2>
-        <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tax ID</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Dues</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-                {% for client in clients %}
-                <tr>
-                    <td class="px-6 py-4 whitespace-nowrap">{{ client.name }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">{{ client.email }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">{{ client.tax_id }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">${{ client.total_dues|floatformat:2 }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <a href="{% url 'client_list' client.pk %}" class="text-indigo-600 hover:text-indigo-900">Edit</a>
-                        <a href="#" class="ml-4 text-red-600 hover:text-red-900">Delete</a>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5" class="px-6 py-4 text-center">No clients available.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold text-gray-800">Client List</h2>
+            <div class="relative">
+                <input type="text" id="clientSearch" placeholder="Search clients..." class="px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-200 pl-10">
+                <svg class="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </div>
+        </div>
+        
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">S.N.</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tax ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Dues</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Payment</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200" id="clientTableBody">
+                    {% for client in clients %}
+                    <tr class="hover:bg-gray-50 transition-colors client-row">
+                        <td class="px-6 py-4 whitespace-nowrap text-gray-700">{{ forloop.counter }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{{ client.name }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-gray-700">{{ client.email }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-gray-700">{{ client.tax_id }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-gray-700">
+                            <span class="font-medium">Rs {{ client.total_dues|floatformat:2 }}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-gray-700">
+                            {% if client.last_payment_date %}
+                                {{ client.last_payment_date|date:"M d, Y" }}
+                            {% else %}
+                                <span class="text-gray-400">No payment</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex space-x-3">
+                                <a href="{% url 'client_list' client.pk %}" class="text-indigo-600 hover:text-indigo-900 flex items-center">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                    Edit
+                                </a>
+                                <a href="#" onclick="confirmDelete({{ client.pk }}, '{{ client.name|escapejs }}')" class="text-red-600 hover:text-red-900 flex items-center">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    Delete
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="px-6 py-8 text-center text-gray-500">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                            <p class="mt-2 text-sm">No clients available.</p>
+                            <p class="mt-1 text-sm">Click the "Add Client" button to create your first client.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
+    
+    <!-- Delete Client Form (Hidden) -->
+    <form id="deleteClientForm" method="post" action="{% url 'client_list' %}" style="display: none;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="delete">
+        <input type="hidden" name="client_id" id="deleteClientId">
+    </form>
+    
+    <script>
+        // Client search functionality
+        document.getElementById('clientSearch').addEventListener('keyup', function() {
+            const searchValue = this.value.toLowerCase();
+            const rows = document.querySelectorAll('.client-row');
+            
+            rows.forEach(row => {
+                const name = row.children[1].textContent.toLowerCase();
+                const email = row.children[2].textContent.toLowerCase();
+                const taxId = row.children[3].textContent.toLowerCase();
+                
+                if (name.includes(searchValue) || email.includes(searchValue) || taxId.includes(searchValue)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+        
+        // Delete confirmation
+        function confirmDelete(clientId, clientName) {
+            event.preventDefault();
+            Swal.fire({
+                title: 'Delete Client?',
+                text: `Are you sure you want to delete ${clientName}? This action cannot be undone.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('deleteClientId').value = clientId;
+                    document.getElementById('deleteClientForm').submit();
+                }
+            });
+        }
+        
+        // Auto-show form if there are errors
+        document.addEventListener('DOMContentLoaded', function() {
+            {% if form.errors or error_message %}
+                // Set Alpine.js state to show form
+                if (!Alpine.store('showForm')) {
+                    document.querySelector('[x-data]').__x.$data.showForm = true;
+                }
+            {% endif %}
+        });
+    </script>
 </div>
 {% endblock %}

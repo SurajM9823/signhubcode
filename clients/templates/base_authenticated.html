@@ -36,12 +36,45 @@
         }
     </style>
 </head>
-<body class="bg-gray-100">
-    <div class="flex h-screen">
+<body class="bg-gray-100 flex flex-col min-h-screen">
+    <!-- Navbar with hamburger -->
+    <header class="fixed top-0 w-full bg-blue-900 text-white shadow-md z-50 mb-5">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-3 px-4">
+                <div class="flex items-center">
+                    <img src="{% static 'images/logo.jpg' %}" alt="Logo" class="h-8 mr-2">
+                    <span class="font-bold text-xl">SignHub</span>
+                </div>
+                <div class="md:hidden">
+                    <button id="menu-toggle" class="focus:outline-none">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+                <nav class="hidden md:flex items-center space-x-4">
+                    <a href="{% url 'dashboard' %}" class="hover:text-teal-200">Dashboard</a>
+                    <a href="{% url 'client_list' %}" class="hover:text-teal-200">Clients</a>
+                    <a href="{% url 'dues_list' %}" class="hover:text-teal-200">Dues</a>
+                    <a href="#" class="hover:text-teal-200">Settings</a>
+                    <a href="{% url 'logout' %}" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md">Logout</a>
+                </nav>
+            </div>
+        </div>
+    </header>    <!-- Mobile menu (hidden by default) -->
+    <div id="mobile-menu" class="md:hidden bg-gradient-to-r from-teal-500 to-blue-900 hidden">
+        <a href="{% url 'dashboard' %}" class="block py-2 px-4 text-white hover:bg-teal-600">Dashboard</a>
+        <a href="{% url 'client_list' %}" class="block py-2 px-4 text-white hover:bg-teal-600">Clients</a>
+        <a href="{% url 'dues_list' %}" class="block py-2 px-4 text-white hover:bg-teal-600">Dues</a>
+        <a href="#" class="block py-2 px-4 text-white hover:bg-teal-600">Settings</a>
+        <a href="{% url 'logout' %}" class="block py-2 px-4 text-white hover:bg-red-600">Logout</a>
+    </div>
+    
+    <div class="flex flex-1">
         <!-- Sidebar -->
-        <div class="w-64 sidebar">
+        <div class="w-64 sidebar hidden md:block">
             <div class="p-6 text-2xl font-bold text-white flex items-center">
-                <img src="{% static 'images/logo.png' %}" alt="Logo" class="h-8 mr-2">
+                <img src="{% static 'images/logo.jpg' %}" alt="Logo" class="h-8 mr-2">
                 SignHub
             </div>
             <nav class="mt-4">
@@ -56,11 +89,37 @@
             </nav>
         </div>
         <!-- Main Content -->
-        <div class="flex-1 p-6 overflow-auto">
+        <div class="flex-1 p-6 mt-10 overflow-auto">
             {% block content %}
             {% endblock %}
         </div>
     </div>
+    
+    <!-- Footer -->
+    <footer class="bg-black from-teal-500 to-blue-900 text-white py-4">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-2 md:mb-0">
+                </div>
+                <p>&copy; 2023 SignHub. All rights reserved.</p>
+
+            </div>
+        </div>
+    </footer>
+
+    <!-- Mobile Menu Toggle Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuToggle = document.getElementById('menu-toggle');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            if (menuToggle && mobileMenu) {
+                menuToggle.addEventListener('click', function() {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
+        });
+    </script>
 
     <!-- SweetAlert2 Notification Script -->
     <script>

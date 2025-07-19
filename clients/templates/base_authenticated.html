@@ -1,21 +1,25 @@
-<!-- templates/base_authenticated.html -->
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>SignHub - {% block title %}{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-    <!-- Include SweetAlert2 CDN -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- Include Alpine.js CDN for form toggles -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
         .sidebar {
             background: linear-gradient(to bottom, #00c6a7, #082a68);
             transition: all 0.3s ease;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 16rem;
+            height: 100vh;
+            z-index: 40;
         }
         .sidebar a {
             display: flex;
@@ -34,11 +38,24 @@
         .sidebar a svg {
             margin-right: 10px;
         }
+        .content-container {
+            margin-left: 16rem;
+            width: calc(100% - 16rem);
+        }
+        @media (max-width: 767px) {
+            .sidebar {
+                display: none;
+            }
+            .content-container {
+                margin-left: 0;
+                width: 100%;
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-100 flex flex-col min-h-screen">
-    <!-- Navbar with hamburger -->
-    <header class="fixed top-0 w-full bg-blue-900 text-white shadow-md z-50 mb-5">
+    <!-- Navbar -->
+    <header class="fixed top-0 w-full bg-blue-900 text-white shadow-md z-50">
         <div class="container mx-auto px-4">
             <div class="flex justify-between items-center py-3 px-4">
                 <div class="flex items-center">
@@ -47,101 +64,110 @@
                 </div>
                 <div class="md:hidden">
                     <button id="menu-toggle" class="focus:outline-none">
-                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M4 6h16M4 12h16M4 18h16"></path>
                         </svg>
                     </button>
                 </div>
                 <nav class="hidden md:flex items-center space-x-4">
                     <a href="{% url 'dashboard' %}" class="hover:text-teal-200">Dashboard</a>
                     <a href="{% url 'client_list' %}" class="hover:text-teal-200">Clients</a>
-                    <a href="{% url 'dues_list' %}" class="hover:text-teal-200">Dues</a>
-                    <a href="#" class="hover:text-teal-200">Settings</a>
+                    <a href="{% url 'client_management' %}" class="hover:text-teal-200">Client Management</a>
+                    <a href="{% url 'payment_management' %}" class="hover:text-teal-200">Payment </a>
+                    <a href="{% url 'office_management' %}" class="hover:text-teal-200">Staff</a>
+                    <a href="{% url 'fiscal_year_management' %}" class="hover:text-teal-200">Fiscal Year</a>
                     <a href="{% url 'logout' %}" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md">Logout</a>
                 </nav>
             </div>
         </div>
-    </header>    <!-- Mobile menu (hidden by default) -->
+    </header>
+
+    <!-- Mobile Menu -->
     <div id="mobile-menu" class="md:hidden bg-gradient-to-r from-teal-500 to-blue-900 hidden">
         <a href="{% url 'dashboard' %}" class="block py-2 px-4 text-white hover:bg-teal-600">Dashboard</a>
         <a href="{% url 'client_list' %}" class="block py-2 px-4 text-white hover:bg-teal-600">Clients</a>
-        <a href="{% url 'dues_list' %}" class="block py-2 px-4 text-white hover:bg-teal-600">Dues</a>
-        <a href="#" class="block py-2 px-4 text-white hover:bg-teal-600">Settings</a>
+        <a href="{% url 'client_management' %}" class="block py-2 px-4 text-white hover:bg-teal-600">Client </a>
+        <a href="{% url 'payment_management' %}" class="block py-2 px-4 text-white hover:bg-teal-600">Payment Management</a>
+        <a href="{% url 'office_management' %}" class="block py-2 px-4 text-white hover:bg-teal-600">Staff</a>
+         <a href="{% url 'reports_management' %}" class="block py-2 px-4 text-white hover:bg-teal-600">Report</a>
+          <a href="{% url 'excel_upload' %}" class="block py-2 px-4 text-white hover:bg-teal-600">Report</a>
+        <a href="{% url 'settings' %}" class="block py-2 px-4 text-white hover:bg-teal-600">Settings</a>
+        <a href="{% url 'fiscal_year_management' %}" class="block py-2 px-4 text-white hover:bg-teal-600">Fiscal Year</a>
         <a href="{% url 'logout' %}" class="block py-2 px-4 text-white hover:bg-red-600">Logout</a>
     </div>
-    
+
+    <!-- Body Container -->
     <div class="flex flex-1">
         <!-- Sidebar -->
-        <div class="w-64 sidebar hidden md:block">
+        <aside class="sidebar hidden md:block">
             <div class="p-6 text-2xl font-bold text-white flex items-center">
                 <img src="{% static 'images/logo.jpg' %}" alt="Logo" class="h-8 mr-2">
                 SignHub
             </div>
             <nav class="mt-4">
                 <ul>
-                    <li><a href="{% url 'dashboard' %}" class="block"><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/></svg>Dashboard</a></li>
-                    <li><a href="{% url 'client_list' %}" class="block"><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"/></svg>Clients</a></li>
-                   <li><a href="{% url 'dues_list' %}" class="block"><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>Dues</a></li>
-                    <li><a href="#" class="block"><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"/></svg>Email Schedules</a></li>
-                    <li><a href="#" class="block"><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"/></svg>Office Management</a></li>
-                    <li><a href="{% url 'logout' %}" class="block"><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"/></svg>Logout</a></li>
+                    <li><a href="{% url 'dashboard' %}"><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/></svg>Dashboard</a></li>
+                    <li><a href="{% url 'client_list' %}"><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0z"/></svg>Clients</a></li>
+                    <li><a href="{% url 'client_management' %}"><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zM6 10a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>Client Management</a></li>
+                    <li><a href="{% url 'payment_management' %}"><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zM6 10a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>Payment Management</a></li>
+                    <li><a href="{% url 'office_management' %}"><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v12h14V5a2 2 0 00-2-2H5zm4 4h2v2H9V7z"/></svg>Staff</a></li>
+                    <li><a href="{% url 'reports_management' %}"><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v12h14V5a2 2 0 00-2-2H5zm4 4h2v2H9V7z"/></svg>reports</a></li>
+                     <li><a href="{% url 'excel_upload' %}"><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v12h14V5a2 2 0 00-2-2H5zm4 4h2v2H9V7z"/></svg>Uploads</a></li>
+                    <li><a href="{% url 'settings' %}"><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v12h14V5a2 2 0 00-2-2H5zm4 4h2v2H9V7z"/></svg>Settings</a></li>
+                    <li><a href="{% url 'fiscal_year_management' %}"><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M4 2a2 2 0 00-2 2v14l4-2 4 2 4-2 4 2V4a2 2 0 00-2-2H4z"/></svg>Fiscal Year</a></li>
+                    <li><a href="{% url 'logout' %}"><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"/></svg>Logout</a></li>
                 </ul>
             </nav>
-        </div>
-        <!-- Main Content -->
-        <div class="flex-1 p-6 mt-10 overflow-auto">
-            {% block content %}
-            {% endblock %}
-        </div>
-    </div>
-    
-    <!-- Footer -->
-    <footer class="bg-black from-teal-500 to-blue-900 text-white py-4">
-        <div class="container mx-auto px-4">
-            <div class="flex flex-col md:flex-row justify-between items-center">
-                <div class="mb-2 md:mb-0">
-                </div>
-                <p>&copy; 2023 SignHub. All rights reserved.</p>
+        </aside>
 
-            </div>
+        <!-- Main Content -->
+        <main class="content-container flex-1 p-6 mt-16 overflow-y-auto">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-black text-white py-4 mt-auto">
+        <div class="container mx-auto px-4 text-center">
+            <p>© 2023 SignHub. All rights reserved.</p>
         </div>
     </footer>
 
-    <!-- Mobile Menu Toggle Script -->
+    <!-- Menu Toggle -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const menuToggle = document.getElementById('menu-toggle');
             const mobileMenu = document.getElementById('mobile-menu');
-            
             if (menuToggle && mobileMenu) {
-                menuToggle.addEventListener('click', function() {
+                menuToggle.addEventListener('click', function () {
                     mobileMenu.classList.toggle('hidden');
                 });
             }
         });
     </script>
 
-    <!-- SweetAlert2 Notification Script -->
+    <!-- SweetAlert2 Notifications -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             {% if success_message %}
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: '{{ success_message }}',
-                    timer: 3000,
-                    timerProgressBar: true,
-                    showConfirmButton: false
-                });
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: '{{ success_message }}',
+                timer: 3000,
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
             {% elif error_message %}
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: '{{ error_message }}',
-                    timer: 3000,
-                    timerProgressBar: true,
-                    showConfirmButton: false
-                });
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: '{{ error_message }}',
+                timer: 3000,
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
             {% endif %}
         });
     </script>

@@ -1,0 +1,488 @@
+{% extends 'base_authenticated.html' %}
+{% load static %}
+
+{% block title %}Office Management{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+    <!-- Office Management Header -->
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Office Management</h1>
+        <div>
+            <span class="text-sm text-gray-500 font-medium">Last updated: Today at {% now "g:i A" %}</span>
+        </div>
+    </div>
+
+    <!-- Create/Edit User Form -->
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-100">
+        <h2 id="form-title" class="text-xl font-semibold text-gray-800 mb-6"></h2>
+        <div class="space-y-6">
+            <input type="hidden" id="user_id" name="user_id">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                    <input type="text" id="username" name="username" required class="block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm transition duration-200 ease-in-out hover:border-gray-400 bg-gray-100 read-only:bg-gray-100 read-only:cursor-not-allowed">
+                </div>
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input type="email" id="email" name="email" required class="block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm transition duration-200 ease-in-out hover:border-gray-400">
+                </div>
+                <div>
+                    <label for="first_name" class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                    <input type="text" id="first_name" name="first_name" class="block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm transition duration-200 ease-in-out hover:border-gray-400">
+                </div>
+                <div>
+                    <label for="last_name" class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                    <input type="text" id="last_name" name="last_name" class="block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm transition duration-200 ease-in-out hover:border-gray-400">
+                </div>
+                <div class="relative">
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <input type="password" id="password" name="password" required class="block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm transition duration-200 ease-in-out hover:border-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed">
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 space-x-2 mt-6">
+                        <button id="toggle-password-visibility" type="button" class="focus:outline-none">
+                            <svg id="eye-icon" class="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                            <svg id="eye-off-icon" class="h-5 w-5 text-gray-500 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
+                            </svg>
+                        </button>
+                        <button id="toggle-password-lock" type="button" class="hidden focus:outline-none">
+                            <svg id="lock-icon" class="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0-1.1.9-2 2-2s2 .9 2 2-2 4-2 4m-2 0H8c-1.1 0-2-.9-2-2s.9-2 2-2h4m6 2c0-2.2-1.8-4-4-4s-4 1.8-4 4 1.8 4 4 4 4-1.8 4-4z"></path>
+                            </svg>
+                            <svg id="unlock-icon" class="h-5 w-5 text-gray-500 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 018 0v4m-4 4v-4m-6 4v-4a2 2 0 012-2h4a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="relative">
+                    <label for="confirm_password" class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+                    <input type="password" id="confirm_password" name="confirm_password" required class="block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm transition duration-200 ease-in-out hover:border-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed">
+                    <button id="toggle-confirm-password-visibility" type="button" class="absolute inset-y-0 right-0 pr-3 flex items-center mt-6 focus:outline-none">
+                        <svg id="confirm-eye-icon" class="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                        <svg id="confirm-eye-off-icon" class="h-5 w-5 text-gray-500 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="flex items-center">
+                    <input type="checkbox" id="is_staff" name="is_staff" class="h-5 w-5 text-teal-600 focus:ring-2 focus:ring-teal-500 border-gray-300 rounded transition duration-200">
+                    <label for="is_staff" class="ml-2 block text-sm font-medium text-gray-900">Is Staff (Admin Access)</label>
+                </div>
+            </div>
+            <div class="flex space-x-4">
+                <button id="submit-user-btn" class="bg-green-600 hover:bg-green-600 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition duration-300 ease-in-out flex items-center">
+                    <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    <span>+ Add New User</span>
+                </button>
+                <button id="cancel-edit-btn" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition duration-300 ease-in-out flex items-center hidden">
+                    <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                    <span>Cancel</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manage Users -->
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-xl font-semibold text-gray-800">Manage Users</h2>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Username</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Email</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">First Name</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Last Name</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Staff Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for user in users %}
+                    <tr class="hover:bg-gray-50 transition duration-200">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ user.username }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ user.email }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ user.first_name }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ user.last_name }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            {% if user.is_staff %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Staff</span>
+                            {% else %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Non-Staff</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <button class="edit-user-btn" data-user-id="{{ user.id }}" data-username="{{ user.username }}" class="text-teal-600 hover:text-teal-800 mr-4 font-semibold transition duration-200">Edit</button>
+                            <button class="delete-user-btn" data-user-id="{{ user.id }}" data-username="{{ user.username }}" class="text-red-600 hover:text-red-800 font-semibold transition duration-200">Delete</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for Form Submission, User Deletion, and Editing -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM loaded, initializing event listeners');
+
+    // Form state
+    let formMode = 'create';
+    let isPasswordLocked = true;
+
+    // DOM elements
+    const formTitle = document.getElementById('form-title');
+    const userIdInput = document.getElementById('user_id');
+    const usernameInput = document.getElementById('username');
+    const emailInput = document.getElementById('email');
+    const firstNameInput = document.getElementById('first_name');
+    const lastNameInput = document.getElementById('last_name');
+    const passwordInput = document.getElementById('password');
+    const confirmPasswordInput = document.getElementById('confirm_password');
+    const isStaffInput = document.getElementById('is_staff');
+    const submitUserBtn = document.getElementById('submit-user-btn');
+    const cancelEditBtn = document.getElementById('cancel-edit-btn');
+    const togglePasswordLockBtn = document.getElementById('toggle-password-lock');
+    const lockIcon = document.getElementById('lock-icon');
+    const unlockIcon = document.getElementById('unlock-icon');
+    const togglePasswordVisibilityBtn = document.getElementById('toggle-password-visibility');
+    const eyeIcon = document.getElementById('eye-icon');
+    const eyeOffIcon = document.getElementById('eye-off-icon');
+    const toggleConfirmPasswordVisibilityBtn = document.getElementById('toggle-confirm-password-visibility');
+    const confirmEyeIcon = document.getElementById('confirm-eye-icon');
+    const confirmEyeOffIcon = document.getElementById('confirm-eye-off-icon');
+
+    // Password visibility toggle
+    togglePasswordVisibilityBtn.addEventListener('click', () => {
+        const isPasswordVisible = passwordInput.type === 'password';
+        passwordInput.type = isPasswordVisible ? 'text' : 'password';
+        eyeIcon.classList.toggle('hidden', !isPasswordVisible);
+        eyeOffIcon.classList.toggle('hidden', isPasswordVisible);
+    });
+
+    toggleConfirmPasswordVisibilityBtn.addEventListener('click', () => {
+        const isConfirmPasswordVisible = confirmPasswordInput.type === 'password';
+        confirmPasswordInput.type = isConfirmPasswordVisible ? 'text' : 'password';
+        confirmEyeIcon.classList.toggle('hidden', !isConfirmPasswordVisible);
+        confirmEyeOffIcon.classList.toggle('hidden', isConfirmPasswordVisible);
+    });
+
+    // Function to reset form to create mode
+    function resetForm() {
+        formMode = 'create';
+        formTitle.textContent = 'Create New User';
+        userIdInput.value = '';
+        usernameInput.value = '';
+        usernameInput.readOnly = false;
+        usernameInput.classList.remove('bg-gray-100');
+        emailInput.value = '';
+        firstNameInput.value = '';
+        lastNameInput.value = '';
+        isStaffInput.checked = false;
+        passwordInput.value = '';
+        passwordInput.disabled = false;
+        passwordInput.required = true;
+        passwordInput.classList.remove('bg-gray-100');
+        confirmPasswordInput.value = '';
+        confirmPasswordInput.disabled = false;
+        confirmPasswordInput.required = true;
+        confirmPasswordInput.classList.remove('bg-gray-100');
+        isPasswordLocked = true;
+        togglePasswordLockBtn.classList.add('hidden');
+        lockIcon.classList.remove('hidden');
+        unlockIcon.classList.add('hidden');
+        submitUserBtn.querySelector('span').textContent = '+ Add New User';
+        cancelEditBtn.classList.add('hidden');
+        passwordInput.type = 'password';
+        confirmPasswordInput.type = 'password';
+        eyeIcon.classList.remove('hidden');
+        eyeOffIcon.classList.add('hidden');
+        confirmEyeIcon.classList.remove('hidden');
+        confirmEyeOffIcon.classList.add('hidden');
+    }
+
+    // Password lock/unlock toggle
+    togglePasswordLockBtn.addEventListener('click', () => {
+        isPasswordLocked = !isPasswordLocked;
+        passwordInput.disabled = isPasswordLocked;
+        confirmPasswordInput.disabled = isPasswordLocked;
+        passwordInput.classList.toggle('bg-gray-100', isPasswordLocked);
+        confirmPasswordInput.classList.toggle('bg-gray-100', isPasswordLocked);
+        lockIcon.classList.toggle('hidden', !isPasswordLocked);
+        unlockIcon.classList.toggle('hidden', isPasswordLocked);
+    });
+
+    // Cancel edit
+    cancelEditBtn.addEventListener('click', resetForm);
+
+    // Form Submission (Create or Update)
+    if (submitUserBtn) {
+        console.log('Submit user button found');
+        submitUserBtn.addEventListener('click', async () => {
+            console.log('Submit user button clicked');
+            const username = usernameInput.value;
+            const email = emailInput.value;
+            const firstName = firstNameInput.value;
+            const lastName = lastNameInput.value;
+            const password = passwordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+            const isStaff = isStaffInput.checked;
+
+            if (!username || !email || (!password && formMode === 'create') || (!confirmPassword && formMode === 'create')) {
+                console.log('Missing required fields');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Please fill in all required fields!',
+                    timer: 3000,
+                    timerProgressBar: true,
+                    showConfirmButton: false
+                });
+                return;
+            }
+
+            if ((formMode === 'create' || !isPasswordLocked) && password !== confirmPassword) {
+                console.log('Passwords do not match');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Passwords do not match!',
+                    timer: 3000,
+                    timerProgressBar: true,
+                    showConfirmButton: false
+                });
+                return;
+            }
+
+            try {
+                const url = formMode === 'create' ? '{% url "create_user" %}' : '{% url "update_user" %}';
+                const payload = formMode === 'create' ? {
+                    username,
+                    email,
+                    first_name: firstName,
+                    last_name: lastName,
+                    password,
+                    is_staff: isStaff
+                } : {
+                    user_id: userIdInput.value,
+                    email,
+                    first_name: firstName,
+                    last_name: lastName,
+                    is_staff: isStaff,
+                    new_password: !isPasswordLocked ? password : null
+                };
+
+                console.log('Sending request to:', url, 'with payload:', payload);
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+                console.log('Response:', data);
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: formMode === 'create' ? 'User created successfully!' : 'User updated successfully!',
+                        timer: 3000,
+                        timerProgressBar: true,
+                        showConfirmButton: false
+                    }).then(() => {
+                        resetForm();
+                        window.location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.error || (formMode === 'create' ? 'Failed to create user.' : 'Failed to update user.'),
+                        timer: 3000,
+                        timerProgressBar: true,
+                        showConfirmButton: false
+                    });
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'An error occurred while processing the request.',
+                    timer: 3000,
+                    timerProgressBar: true,
+                    showConfirmButton: false
+                });
+            }
+        });
+    } else {
+        console.error('Submit user button not found');
+    }
+
+    // Delete User
+    const deleteUserButtons = document.querySelectorAll('.delete-user-btn');
+    console.log('Found', deleteUserButtons.length, 'delete buttons');
+    deleteUserButtons.forEach(button => {
+        button.addEventListener('click', async () => {
+            console.log('Delete button clicked for user ID:', button.dataset.userId);
+            const userId = button.dataset.userId;
+            const username = button.dataset.username;
+
+            const result = await Swal.fire({
+                icon: 'warning',
+                title: 'Confirm Deletion',
+                text: `Are you sure you want to delete user "${username}"?`,
+                showCancelButton: true,
+                confirmButtonText: 'Delete',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#6b7280'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    console.log('Sending delete user request for ID:', userId);
+                    const response = await fetch('{% url "delete_user" %}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                        body: JSON.stringify({ user_id: userId })
+                    });
+
+                    const data = await response.json();
+                    console.log('Delete user response:', data);
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: 'User deleted successfully!',
+                            timer: 2000,
+                            timerProgressBar: true,
+                            showConfirmButton: false
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: data.error || 'Failed to delete user.',
+                            timer: 3000,
+                            timerProgressBar: true,
+                            showConfirmButton: false
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error deleting user:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An error occurred while deleting the user.',
+                        timer: 3000,
+                        timerProgressBar: true,
+                        showConfirmButton: false
+                    });
+                }
+            }
+        });
+    });
+
+    // Edit User
+    const editUserButtons = document.querySelectorAll('.edit-user-btn');
+    console.log('Found', editUserButtons.length, 'edit buttons');
+    editUserButtons.forEach(button => {
+        button.addEventListener('click', async () => {
+            console.log('Edit button clicked for user ID:', button.dataset.userId);
+            const userId = button.dataset.userId;
+            const username = button.dataset.username;
+
+            try {
+                console.log('Fetching user data for ID:', userId);
+                const response = await fetch(`{% url "get_user" %}?user_id=${userId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    }
+                });
+
+                const data = await response.json();
+                console.log('Get user response:', data);
+                if (data.success) {
+                    formMode = 'edit';
+                    formTitle.textContent = `Edit User: ${username}`;
+                    userIdInput.value = userId;
+                    usernameInput.value = username;
+                    usernameInput.readOnly = true;
+                    usernameInput.classList.add('bg-gray-100');
+                    emailInput.value = data.user.email || '';
+                    firstNameInput.value = data.user.first_name || '';
+                    lastNameInput.value = data.user.last_name || '';
+                    isStaffInput.checked = data.user.is_staff || false;
+                    passwordInput.value = '';
+                    passwordInput.disabled = true;
+                    passwordInput.required = false;
+                    passwordInput.classList.add('bg-gray-100');
+                    confirmPasswordInput.value = '';
+                    confirmPasswordInput.disabled = true;
+                    confirmPasswordInput.required = false;
+                    confirmPasswordInput.classList.add('bg-gray-100');
+                    isPasswordLocked = true;
+                    togglePasswordLockBtn.classList.remove('hidden');
+                    lockIcon.classList.remove('hidden');
+                    unlockIcon.classList.add('hidden');
+                    submitUserBtn.querySelector('span').textContent = 'Save Changes';
+                    cancelEditBtn.classList.remove('hidden');
+                    passwordInput.type = 'password';
+                    confirmPasswordInput.type = 'password';
+                    eyeIcon.classList.remove('hidden');
+                    eyeOffIcon.classList.add('hidden');
+                    confirmEyeIcon.classList.remove('hidden');
+                    confirmEyeOffIcon.classList.add('hidden');
+                } else {
+                    console.error('Failed to fetch user data:', data.error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.error || 'Failed to fetch user data.',
+                        timer: 3000,
+                        timerProgressBar: true,
+                        showConfirmButton: false
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'An error occurred while fetching user data.',
+                    timer: 3000,
+                    timerProgressBar: true,
+                    showConfirmButton: false
+                });
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

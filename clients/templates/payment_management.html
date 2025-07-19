@@ -1,0 +1,842 @@
+{% extends 'base_authenticated.html' %}
+{% load static %}
+
+{% block title %}Client Payment Management{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Client Payment Management</h1>
+            <p class="text-gray-600 text-sm mt-1">Manage client payments and transactions</p>
+        </div>
+    </div>
+
+    <!-- Client Search -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6 border border-gray-100">
+        <div class="flex flex-col sm:flex-row sm:space-x-4 gap-4">
+            <div class="flex-1">
+                <label for="client_id" class="block text-sm font-medium text-gray-700 mb-1">Client ID</label>
+                <input type="text" id="client_id" placeholder="Enter client ID" 
+                       class="block w-full px-3 py-2 border border-gray-200 rounded-md shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm">
+            </div>
+            <div class="flex-1 relative">
+                <label for="client_name" class="block text-sm font-medium text-gray-700 mb-1">Client Name</label>
+                <input type="text" id="client_name" placeholder="Enter client name (e.g., NISS)" 
+                       class="block w-full px-3 py-2 border border-gray-200 rounded-md shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm">
+                <div id="client-dropdown" class="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto hidden">
+                    <ul id="client-list" class="text-sm text-gray-700"></ul>
+                </div>
+            </div>
+            <button id="search-client-btn" class="bg-teal-600 hover:bg-teal-700 text-white font-medium py-2 px-4 rounded-md transition-colors flex items-center space-x-2 sm:mt-7">
+                <i class="fas fa-search"></i>
+                <span>Search</span>
+            </button>
+        </div>
+        <!-- Client Payment Summary -->
+        <div id="client-info" class="mt-4 p-4 bg-green-50 rounded-md border border-green-200 hidden">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-check-circle text-green-600"></i>
+                <span class="text-sm font-medium text-green-800">Client Found:</span>
+                <span id="client-name" class="text-sm font-semibold text-green-900"></span>
+            </div>
+            <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+                <div>
+                    <span class="font-medium text-gray-700">Previous Dues: NPR </span>
+                    <span id="previous-dues" class="font-semibold text-red-600 cursor-pointer hover:underline">0.00</span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-700">Current Year Dues: NPR </span>
+                    <span id="current-dues" class="font-semibold text-red-600 cursor-pointer hover:underline">0.00</span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-700">Total Dues: NPR </span>
+                    <span id="total-dues" class="font-semibold text-red-600 cursor-pointer hover:underline">0.00</span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-700">Total Paid: NPR </span>
+                    <span id="total-paid" class="font-semibold text-green-600 cursor-pointer hover:underline">0.00</span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-700">Total Discount: NPR </span>
+                    <span id="total-discount" class="font-semibold text-purple-600 cursor-pointer hover:underline">0.00</span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-700">Total Remaining: NPR </span>
+                    <span id="total-remaining" class="font-semibold text-red-600 cursor-pointer hover:underline">0.00</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Form -->
+    <div id="payment-form-container" class="bg-white rounded-lg shadow-md p-6 mb-6 border border-gray-100 hidden">
+        <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
+            <i class="fas fa-dollar-sign text-teal-600"></i>
+            <span>Process Payment</span>
+        </h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Total Dues (NPR)</label>
+                <input type="text" id="total-dues-display" readonly 
+                       class="w-full px-3 py-2 border border-gray-200 rounded-md bg-gray-50 text-sm font-semibold">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Payment Amount (NPR)</label>
+                <input type="number" id="payment-amount" min="0" step="0.01" placeholder="0.00" 
+                       class="w-full px-3 py-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Payment Type</label>
+                <select id="payment-type" class="w-full px-3 py-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm">
+                    <option value="CASH">Cash</option>
+                    <option value="BANK">Bank Transfer</option>
+                    <option value="CHECK">Check</option>
+                    <option value="ONLINE">Online</option>
+                </select>
+            </div>
+            <div id="cheque-number-container" class="hidden">
+                <label for="cheque-number" class="block text-sm font-medium text-gray-700 mb-1">Cheque Number (Optional)</label>
+                <input type="text" id="cheque-number" placeholder="Enter cheque number" 
+                       class="w-full px-3 py-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Discount Amount (NPR)</label>
+                <input type="number" id="discount-amount" min="0" step="0.01" placeholder="0.00" 
+                       class="w-full px-3 py-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm">
+            </div>
+        </div>
+        <div class="flex space-x-3 mt-6">
+            <button id="apply-payment-btn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md font-medium transition-colors flex items-center space-x-2">
+                <i class="fas fa-save"></i>
+                <span>Apply Payment</span>
+            </button>
+            <button id="generate-bill-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium transition-colors flex items-center space-x-2">
+                <i class="fas fa-file-invoice"></i>
+                <span>Generate Bill</span>
+            </button>
+            <button id="clear-payment-form-btn" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md font-medium transition-colors flex items-center space-x-2">
+                <i class="fas fa-eraser"></i>
+                <span>Clear</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Transaction History Table -->
+    <div class="bg-white rounded-lg shadow-md p-6 border border-gray-100">
+        <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
+            <i class="fas fa-table text-teal-600"></i>
+            <span>Transaction History</span>
+        </h2>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm border-collapse">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-2 text-left font-medium text-gray-600 border-b">Date</th>
+                        <th class="px-4 py-2 text-left font-medium text-gray-600 border-b">Board ID</th>
+                        <th class="px-4 py-2 text-left font-medium text-gray-600 border-b">Type</th>
+                        <th class="px-4 py-2 text-left font-medium text-gray-600 border-b">Amount (NPR)</th>
+                        <th class="px-4 py-2 text-left font-medium text-gray-600 border-b">Payment Type</th>
+                        <th class="px-4 py-2 text-left font-medium text-gray-600 border-b">Cheque Number</th>
+                        <th class="px-4 py-2 text-left font-medium text-gray-600 border-b">Description</th>
+                        <th class="px-4 py-2 text-left font-medium text-gray-600 border-b">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="transaction-table-body" class="divide-y divide-gray-200">
+                    <tr id="no-transaction-row">
+                        <td colspan="8" class="px-4 py-6 text-center text-gray-500">
+                            <i class="fas fa-inbox text-2xl mb-2"></i>
+                            <p>No transactions recorded yet</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <!-- Pagination -->
+        <div class="mt-4 flex justify-between items-center">
+            <div>
+                <span id="pagination-info" class="text-sm text-gray-600"></span>
+            </div>
+            <div class="flex space-x-2">
+                <button id="prev-page" class="bg-gray-300 hover:bg-gray-400 text-gray-700 py-1 px-3 rounded-md disabled:opacity-50" disabled>Previous</button>
+                <button id="next-page" class="bg-gray-300 hover:bg-gray-400 text-gray-700 py-1 px-3 rounded-md disabled:opacity-50" disabled>Next</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transaction Details Modal -->
+    <div id="transaction-details-modal" class="fixed inset-0 bg-black bg-opacity-50 modal-backdrop hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl mx-4">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">Transaction Details</h3>
+                <button id="close-transaction-details-modal" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="transaction-details-content" class="text-sm">
+                <table class="w-full border-collapse">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-2 text-left font-medium text-gray-600 border-b">Field</th>
+                            <th class="px-4 py-2 text-left font-medium text-gray-600 border-b">Value</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transaction-details-table" class="divide-y divide-gray-200"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bill Preview Modal -->
+    <div id="bill-preview-modal" class="fixed inset-0 bg-black bg-opacity-50 modal-backdrop hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl mx-4">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">Payment Bill</h3>
+                <button id="close-bill-preview-modal" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="bill-content" class="text-sm"></div>
+            <div class="flex space-x-3 mt-6">
+                <button id="download-bill-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium transition-colors flex items-center space-x-2">
+                    <i class="fas fa-download"></i>
+                    <span>Download PDF</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let currentClientId = null;
+    let currentPage = 1;
+    const transactionsPerPage = 10;
+    let latestTransaction = null;
+
+    // DOM elements
+    const clientIdInput = document.getElementById('client_id');
+    const clientNameInput = document.getElementById('client_name');
+    const clientDropdown = document.getElementById('client-dropdown');
+    const clientList = document.getElementById('client-list');
+    const searchClientBtn = document.getElementById('search-client-btn');
+    const clientInfo = document.getElementById('client-info');
+    const clientNameSpan = document.getElementById('client-name');
+    const previousDuesSpan = document.getElementById('previous-dues');
+    const currentDuesSpan = document.getElementById('current-dues');
+    const totalDuesSpan = document.getElementById('total-dues');
+    const totalPaidSpan = document.getElementById('total-paid');
+    const totalDiscountSpan = document.getElementById('total-discount');
+    const totalRemainingSpan = document.getElementById('total-remaining');
+    const paymentFormContainer = document.getElementById('payment-form-container');
+    const totalDuesDisplay = document.getElementById('total-dues-display');
+    const paymentAmountInput = document.getElementById('payment-amount');
+    const paymentTypeSelect = document.getElementById('payment-type');
+    const chequeNumberInput = document.getElementById('cheque-number');
+    const chequeNumberContainer = document.getElementById('cheque-number-container');
+    const discountAmountInput = document.getElementById('discount-amount');
+    const applyPaymentBtn = document.getElementById('apply-payment-btn');
+    const generateBillBtn = document.getElementById('generate-bill-btn');
+    const clearPaymentFormBtn = document.getElementById('clear-payment-form-btn');
+    const transactionTableBody = document.getElementById('transaction-table-body');
+    const prevPageBtn = document.getElementById('prev-page');
+    const nextPageBtn = document.getElementById('next-page');
+    const paginationInfo = document.getElementById('pagination-info');
+    const transactionDetailsModal = document.getElementById('transaction-details-modal');
+    const transactionDetailsTable = document.getElementById('transaction-details-table');
+    const closeTransactionDetailsModal = document.getElementById('close-transaction-details-modal');
+    const billPreviewModal = document.getElementById('bill-preview-modal');
+    const billContent = document.getElementById('bill-content');
+    const closeBillPreviewModal = document.getElementById('close-bill-preview-modal');
+    const downloadBillBtn = document.getElementById('download-bill-btn');
+
+    // Show/hide cheque number input based on payment type
+    paymentTypeSelect.addEventListener('change', () => {
+        chequeNumberContainer.classList.toggle('hidden', paymentTypeSelect.value !== 'CHECK');
+    });
+
+    // Reset UI
+    function resetUI() {
+        clientInfo.classList.add('hidden');
+        paymentFormContainer.classList.add('hidden');
+        currentClientId = null;
+        transactionTableBody.innerHTML = `
+            <tr id="no-transaction-row">
+                <td colspan="8" class="px-4 py-6 text-center text-gray-500">
+                    <i class="fas fa-inbox text-2xl mb-2"></i>
+                    <p>No transactions recorded yet</p>
+                </td>
+            </tr>
+        `;
+        updateFinancialSummary({});
+    }
+
+    // Search client
+    async function searchClient(clientId) {
+        if (!clientId) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Missing Client ID',
+                text: 'Please enter a client ID or select a client from the dropdown',
+                timer: 2000,
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
+            return;
+        }
+
+        try {
+            const response = await fetch(`/payment-management/client/${clientId}/`);
+            const data = await response.json();
+            if (data.success) {
+                currentClientId = clientId;
+                clientNameSpan.textContent = data.client.name;
+                clientInfo.classList.remove('hidden');
+                paymentFormContainer.classList.remove('hidden');
+                fetchTransactions(clientId, 1);
+                updateFinancialSummary(data.financial_summary);
+                totalDuesDisplay.value = data.financial_summary.total_remaining.toFixed(2);
+                clientIdInput.value = '';
+                clientNameInput.value = '';
+                clientDropdown.classList.add('hidden');
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Client Found',
+                    text: `${data.client.name} selected successfully`,
+                    timer: 1500,
+                    timerProgressBar: true,
+                    showConfirmButton: false
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Client Not Found',
+                    text: data.message || 'Please check the client ID or name and try again',
+                    timer: 2000,
+                    timerProgressBar: true,
+                    showConfirmButton: false
+                });
+                resetUI();
+            }
+        } catch (error) {
+            console.error('Error searching client:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Failed to search client',
+                timer: 2000,
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
+            resetUI();
+        }
+    }
+
+    // Populate client dropdown
+    async function populateClientDropdown(searchTerm) {
+        try {
+            const response = await fetch(`/payment-management/clients/?search=${encodeURIComponent(searchTerm)}`);
+            const clients = await response.json();
+            clientList.innerHTML = '';
+            if (clients.length === 0) {
+                clientDropdown.classList.add('hidden');
+                return;
+            }
+            clients.forEach(client => {
+                const li = document.createElement('li');
+                li.className = 'px-4 py-2 hover:bg-gray-100 cursor-pointer';
+                li.textContent = client.name;
+                li.dataset.clientId = client.id;
+                li.addEventListener('click', () => searchClient(client.id));
+                clientList.appendChild(li);
+            });
+            clientDropdown.classList.remove('hidden');
+        } catch (error) {
+            console.error('Error fetching clients:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Failed to load clients',
+                timer: 2000,
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
+        }
+    }
+
+    // Fetch transactions with pagination
+    async function fetchTransactions(clientId, page = 1) {
+        try {
+            const response = await fetch(`/payment-management/transactions/${clientId}/?page=${page}&per_page=${transactionsPerPage}`);
+            const data = await response.json();
+            if (data.success) {
+                updateTransactionTable(data.transactions);
+                updatePagination(data.pagination);
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: data.message || 'Failed to load transactions',
+                    timer: 2000,
+                    timerProgressBar: true,
+                    showConfirmButton: false
+                });
+            }
+        } catch (error) {
+            console.error('Error fetching transactions:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Failed to load transactions',
+                timer: 2000,
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
+        }
+    }
+
+    // Update transaction table
+    function updateTransactionTable(transactions) {
+        transactionTableBody.innerHTML = '';
+        if (transactions.length === 0) {
+            transactionTableBody.innerHTML = `
+                <tr id="no-transaction-row">
+                    <td colspan="8" class="px-4 py-6 text-center text-gray-500">
+                        <i class="fas fa-inbox text-2xl mb-2"></i>
+                        <p>No transactions recorded yet</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        transactions.forEach(transaction => {
+            const row = document.createElement('tr');
+            row.className = 'hover:bg-gray-50 transition-colors';
+            row.innerHTML = `
+                <td class="px-4 py-2 text-gray-600 border-b">${new Date(transaction.created_at).toLocaleDateString()}</td>
+                <td class="px-4 py-2 text-gray-600 border-b">${transaction.board_id || '-'}</td>
+                <td class="px-4 py-2 text-gray-600 border-b">${transaction.transaction_type}</td>
+                <td class="px-4 py-2 text-gray-600 border-b">NPR ${parseFloat(transaction.amount).toFixed(2)}</td>
+                <td class="px-4 py-2 text-gray-600 border-b">${transaction.payment_type || '-'}</td>
+                <td class="px-4 py-2 text-gray-600 border-b">${transaction.cheque_number || '-'}</td>
+                <td class="px-4 py-2 text-gray-600 border-b">${transaction.description}</td>
+                <td class="px-4 py-2 border-b">
+                    <button class="edit-transaction text-blue-600 hover:text-blue-800 mr-2" data-id="${transaction.id}">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="delete-transaction text-red-600 hover:text-red-800" data-id="${transaction.id}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            `;
+            transactionTableBody.appendChild(row);
+        });
+
+        document.querySelectorAll('.edit-transaction').forEach(button => {
+            button.addEventListener('click', () => editTransaction(button.dataset.id));
+        });
+        document.querySelectorAll('.delete-transaction').forEach(button => {
+            button.addEventListener('click', () => deleteTransaction(button.dataset.id));
+        });
+    }
+
+    // Update financial summary
+    function updateFinancialSummary(summary) {
+        previousDuesSpan.textContent = parseFloat(summary.previous_dues || 0).toFixed(2);
+        currentDuesSpan.textContent = parseFloat(summary.current_year_total || 0).toFixed(2);
+        totalDuesSpan.textContent = parseFloat(summary.total_dues || 0).toFixed(2);
+        totalPaidSpan.textContent = parseFloat(summary.total_paid || 0).toFixed(2);
+        totalDiscountSpan.textContent = parseFloat(summary.total_discount || 0).toFixed(2);
+        totalRemainingSpan.textContent = parseFloat(summary.total_remaining || 0).toFixed(2);
+
+        // Add click event listeners for details
+        previousDuesSpan.onclick = () => showDetails('Previous Dues', summary.previous_dues_details || []);
+        currentDuesSpan.onclick = () => showDetails('Current Year Dues', summary.current_year_details || []);
+        totalDuesSpan.onclick = () => showDetails('Total Dues', summary.total_dues_details || []);
+        totalPaidSpan.onclick = () => showDetails('Total Paid', summary.total_paid_details || []);
+        totalDiscountSpan.onclick = () => showDetails('Total Discount', summary.total_discount_details || []);
+        totalRemainingSpan.onclick = () => showDetails('Total Remaining', summary.total_remaining_details || []);
+    }
+
+    // Show transaction details in modal
+    function showDetails(title, details) {
+        transactionDetailsTable.innerHTML = '';
+        if (!details || details.length === 0) {
+            transactionDetailsTable.innerHTML = `
+                <tr>
+                    <td colspan="2" class="px-4 py-2 text-center text-gray-500">No details available</td>
+                </tr>
+            `;
+        } else {
+            details.forEach(detail => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-4 py-2 text-gray-600 border-b">${detail.field}</td>
+                    <td class="px-4 py-2 text-gray-600 border-b">${detail.value}</td>
+                `;
+                transactionDetailsTable.appendChild(row);
+            });
+        }
+        transactionDetailsModal.classList.remove('hidden');
+    }
+
+    // Update pagination
+    function updatePagination(pagination) {
+        currentPage = pagination.current_page;
+        const totalPages = pagination.total_pages;
+        paginationInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+        prevPageBtn.disabled = currentPage === 1;
+        nextPageBtn.disabled = currentPage === totalPages;
+    }
+
+    // Edit transaction
+    async function editTransaction(transactionId) {
+        try {
+            const response = await fetch(`/payment-management/transaction/${transactionId}/`);
+            const data = await response.json();
+            if (data.success) {
+                const transaction = data.transaction;
+                paymentAmountInput.value = transaction.transaction_type === 'PAYMENT' ? transaction.amount : '';
+                discountAmountInput.value = transaction.transaction_type === 'DISCOUNT' ? transaction.amount : '';
+                paymentTypeSelect.value = transaction.payment_type || 'CASH';
+                chequeNumberInput.value = transaction.cheque_number || '';
+                chequeNumberContainer.classList.toggle('hidden', transaction.payment_type !== 'CHECK');
+                applyPaymentBtn.dataset.transactionId = transactionId;
+                applyPaymentBtn.querySelector('span').textContent = 'Update Payment';
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Editing Transaction',
+                    text: 'Modify the payment or discount and click Update Payment',
+                    timer: 1500,
+                    timerProgressBar: true,
+                    showConfirmButton: false
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: data.message || 'Failed to load transaction details',
+                    timer: 2000,
+                    timerProgressBar: true,
+                    showConfirmButton: false
+                });
+            }
+        } catch (error) {
+            console.error('Error fetching transaction:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Failed to load transaction details',
+                timer: 2000,
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
+        }
+    }
+
+    // Delete transaction
+    async function deleteTransaction(transactionId) {
+        Swal.fire({
+            title: 'Delete Transaction?',
+            text: "This action cannot be undone",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch(`/payment-management/transaction/delete/${transactionId}/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': '{{ csrf_token }}',
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        fetchTransactions(currentClientId, currentPage);
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Deleted',
+                            text: 'Transaction has been deleted successfully',
+                            timer: 1500,
+                            timerProgressBar: true,
+                            showConfirmButton: false
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: data.message || 'Failed to delete transaction',
+                            timer: 2000,
+                            timerProgressBar: true,
+                            showConfirmButton: false
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error deleting transaction:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Failed to delete transaction',
+                        timer: 2000,
+                        timerProgressBar: true,
+                        showConfirmButton: false
+                    });
+                }
+            }
+        });
+    }
+
+    // Apply payment or discount
+    applyPaymentBtn.addEventListener('click', async function() {
+        if (!currentClientId) {
+            Swal.fire({
+                icon: 'error',
+                title: 'No Client Selected',
+                text: 'Please search and select a client first',
+                timer: 2000,
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
+            return;
+        }
+
+        const paymentAmount = parseFloat(paymentAmountInput.value) || 0;
+        const discountAmount = parseFloat(discountAmountInput.value) || 0;
+        const paymentType = paymentTypeSelect.value;
+        const chequeNumber = chequeNumberInput.value.trim();
+        const transactionId = applyPaymentBtn.dataset.transactionId || '';
+
+        if (paymentAmount < 0 || discountAmount < 0) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid Input',
+                text: 'Payment and discount cannot be negative',
+                timer: 2000,
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
+            return;
+        }
+
+        const totalRemaining = parseFloat(totalDuesDisplay.value);
+        if (paymentAmount + discountAmount > totalRemaining) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid Amount',
+                text: 'Payment and discount cannot exceed total remaining dues',
+                timer: 2000,
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
+            return;
+        }
+
+        const payload = {
+            client_id: currentClientId,
+            payment_amount: paymentAmount,
+            discount_amount: discountAmount,
+            payment_type: paymentType,
+            cheque_number: chequeNumber,
+            transaction_id: transactionId
+        };
+
+        try {
+            const response = await fetch('/payment-management/apply-payment/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+            const data = await response.json();
+            if (data.success) {
+                latestTransaction = data.transaction;
+                fetchTransactions(currentClientId, currentPage);
+                searchClient(currentClientId); // Refresh financial summary
+                clearPaymentForm();
+                Swal.fire({
+                    icon: 'success',
+                    title: transactionId ? 'Transaction Updated' : 'Payment Applied',
+                    text: `Payment/Discount ${transactionId ? 'updated' : 'applied'} successfully`,
+                    timer: 1500,
+                    timerProgressBar: true,
+                    showConfirmButton: false
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: data.message || 'Failed to apply payment/discount',
+                    timer: 2000,
+                    timerProgressBar: true,
+                    showConfirmButton: false
+                });
+            }
+        } catch (error) {
+            console.error('Error applying payment:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Failed to apply payment/discount',
+                timer: 2000,
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
+        }
+    });
+
+    // Generate bill
+    generateBillBtn.addEventListener('click', async function() {
+        if (!latestTransaction || !currentClientId) {
+            Swal.fire({
+                icon: 'error',
+                title: 'No Transaction',
+                text: 'Please apply a payment or discount first to generate a bill',
+                timer: 2000,
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
+            return;
+        }
+
+        try {
+            const response = await fetch(`/payment-management/generate-bill/${currentClientId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ transaction_id: latestTransaction.id })
+            });
+            const data = await response.json();
+            if (data.success) {
+                billContent.innerHTML = data.bill_html;
+                billPreviewModal.classList.remove('hidden');
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: data.message || 'Failed to generate bill',
+                    timer: 2000,
+                    timerProgressBar: true,
+                    showConfirmButton: false
+                });
+            }
+        } catch (error) {
+            console.error('Error generating bill:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Failed to generate bill',
+                timer: 2000,
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
+        }
+    });
+
+    // Download bill as PDF
+    downloadBillBtn.addEventListener('click', async function() {
+        try {
+            const response = await fetch(`/payment-management/download-bill/${currentClientId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ transaction_id: latestTransaction.id })
+            });
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `bill_${currentClientId}_${latestTransaction.id}.pdf`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Error downloading bill:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Failed to download bill',
+                timer: 2000,
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
+        }
+    });
+
+    // Clear payment form
+    function clearPaymentForm() {
+        paymentAmountInput.value = '';
+        discountAmountInput.value = '';
+        paymentTypeSelect.value = 'CASH';
+        chequeNumberInput.value = '';
+        chequeNumberContainer.classList.add('hidden');
+        applyPaymentBtn.dataset.transactionId = '';
+        applyPaymentBtn.querySelector('span').textContent = 'Apply Payment';
+    }
+
+    clearPaymentFormBtn.addEventListener('click', clearPaymentForm);
+
+    // Search client event listeners
+    searchClientBtn.addEventListener('click', () => {
+        const clientId = clientIdInput.value.trim();
+        searchClient(clientId);
+    });
+
+    clientIdInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            searchClient(clientIdInput.value.trim());
+        }
+    });
+
+    clientNameInput.addEventListener('input', () => {
+        const searchTerm = clientNameInput.value.trim();
+        populateClientDropdown(searchTerm);
+    });
+
+    clientNameInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            const firstClient = clientList.querySelector('li');
+            if (firstClient) {
+                searchClient(firstClient.dataset.clientId);
+            }
+        }
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!clientDropdown.contains(e.target) && e.target !== clientNameInput) {
+            clientDropdown.classList.add('hidden');
+        }
+    });
+
+    // Pagination event listeners
+    prevPageBtn.addEventListener('click', () => {
+        if (currentPage > 1) {
+            fetchTransactions(currentClientId, currentPage - 1);
+        }
+    });
+
+    nextPageBtn.addEventListener('click', () => {
+    fetchTransactions(currentClientId, currentPage + 1);
+    });
+
+    // Modal close event listeners
+    closeTransactionDetailsModal.addEventListener('click', () => {
+        transactionDetailsModal.classList.add('hidden');
+    });
+
+    closeBillPreviewModal.addEventListener('click', () => {
+        billPreviewModal.classList.add('hidden');
+    });
+});
+</script>
+{% endblock %}

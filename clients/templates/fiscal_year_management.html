@@ -1,0 +1,210 @@
+{% extends 'base_authenticated.html' %}
+{% load static %}
+
+{% block title %}Fiscal Year Management{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+    <!-- Header with Action Button -->
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Fiscal Year Management</h1>
+            <p class="text-gray-600 text-sm mt-1">Manage fiscal years for the dashboard</p>
+        </div>
+        <div>
+            <button id="add-fiscal-year-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2 text-sm">
+                <i class="fas fa-plus"></i>
+                <span>Add Fiscal Year</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="mb-6">
+        {% for message in messages %}
+        <div class="glass-effect rounded-xl shadow-lg p-4 border border-white/20 {% if message.tags == 'success' %}bg-green-50 border-green-200{% else %}bg-red-50 border-red-200{% endif %}">
+            <div class="flex items-center space-x-2">
+                <i class="fas {% if message.tags == 'success' %}fa-check-circle text-green-600{% else %}fa-exclamation-circle text-red-600{% endif %}"></i>
+                <span class="text-sm font-medium {% if message.tags == 'success' %}text-green-800{% else %}text-red-800{% endif %}">{{ message }}</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Fiscal Year Table -->
+    <div class="glass-effect rounded-xl shadow-lg p-6 border border-white/20">
+        <h2 class="text-lg font-semibold text-gray-800 mb-5 flex items-center space-x-2">
+            <i class="fas fa-table text-teal-600"></i>
+            <span>Fiscal Year Summary</span>
+        </h2>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left font-medium text-gray-600">Fiscal Year</th>
+                        <th class="px-4 py-3 text-left font-medium text-gray-600">Status</th>
+                        <th class="px-4 py-3 text-left font-medium text-gray-600">Created At</th>
+                        <th class="px-4 py-3 text-left font-medium text-gray-600">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="fiscal-year-table-body" class="divide-y divide-gray-200">
+                    {% if fiscal_years %}
+                        {% for fiscal_year in fiscal_years %}
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-4 py-3 text-gray-900 font-medium">{{ fiscal_year.name }}</td>
+                            <td class="px-4 py-3">
+                                <span class="px-2 py-1 text-xs font-medium rounded-full {% if fiscal_year.is_active %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                                    {% if fiscal_year.is_active %}Active{% else %}Inactive{% endif %}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 text-gray-600">{{ fiscal_year.created_at|date:"Y-m-d H:i" }}</td>
+                            <td class="px-4 py-3">
+                                {% if not fiscal_year.is_active %}
+                                <button onclick="setFiscalYearActive({{ fiscal_year.id }})" class="text-green-600 hover:text-green-800 transition-colors">
+                                    <i class="fas fa-check"></i> Set Active
+                                </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr id="no-data-row">
+                          <td colspan="4" class="px-4 py-8 text-center text-gray-500">
+                                <i class="fas fa-inbox text-3xl mb-2"></i>
+                                <p>No fiscal years added yet</p>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Add Fiscal Year Modal -->
+<div id="fiscal-year-modal" class="fixed inset-0 bg-black bg-opacity-50 modal-backdrop hidden flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md mx-4">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-900">Add Fiscal Year</h3>
+            <button id="close-fiscal-year-modal" class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form id="fiscal-year-form" action="{% url 'add_fiscal_year' %}" method="POST">
+            {% csrf_token %}
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Fiscal Year Name</label>
+                    <input type="text" id="fiscal_year_name" name="fiscal_year_name" placeholder="e.g., FY 2025-2026" 
+                           class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
+                </div>
+              
+
+                     <div class="flex space-x-3 pt-4">
+                    <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition-colors">
+                        Save Fiscal Year
+                    </button>
+                    <button type="button" id="cancel-fiscal-year" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 py-2 px-4 rounded-lg font-medium transition-colors">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // DOM elements
+    const addFiscalYearBtn = document.getElementById('add-fiscal-year-btn');
+    const fiscalYearModal = document.getElementById('fiscal-year-modal');
+    const closeFiscalYearModal = document.getElementById('close-fiscal-year-modal');
+    const cancelFiscalYear = document.getElementById('cancel-fiscal-year');
+    const fiscalYearForm = document.getElementById('fiscal-year-form');
+    const fiscalYearNameInput = document.getElementById('fiscal_year_name');
+
+    // Open modal
+    addFiscalYearBtn.addEventListener('click', function() {
+        fiscalYearModal.classList.remove('hidden');
+        fiscalYearNameInput.focus();
+    });
+
+    // Close modal
+    closeFiscalYearModal.addEventListener('click', function() {
+        fiscalYearModal.classList.add('hidden');
+        fiscalYearNameInput.value = '';
+    });
+
+    cancelFiscalYear.addEventListener('click', function() {
+        fiscalYearModal.classList.add('hidden');
+        fiscalYearNameInput.value = '';
+    });
+
+    // Form submission validation
+    fiscalYearForm.addEventListener('submit', function(e) {
+        const name = fiscalYearNameInput.value.trim();
+        if (!name) {
+            e.preventDefault();
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid Input',
+                text: 'Please enter a fiscal year name',
+                timer: 2000,
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
+        }
+    });
+
+    // Set fiscal year active
+    window.setFiscalYearActive = function(fiscalYearId) {
+        Swal.fire({
+            title: 'Set Fiscal Year Active?',
+            text: 'This will deactivate all other fiscal years',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#10b981',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Yes, set active!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/fiscal-years/set-active/${fiscalYearId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        window.location.reload();
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: data.message || 'Failed to set fiscal year as active',
+                            timer: 2000,
+                            timerProgressBar: true,
+                            showConfirmButton: false
+                        });
+                    }
+                })
+                .catch(error => {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An error occurred while setting the fiscal year',
+                        timer: 2000,
+                        timerProgressBar: true,
+                        showConfirmButton: false
+                    });
+                });
+            }
+        });
+    };
+});
+</script>
+{% endblock %}

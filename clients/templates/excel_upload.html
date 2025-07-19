@@ -1,0 +1,277 @@
+{% extends 'base_authenticated.html' %}
+{% load static %}
+
+{% block title %}Excel Upload - Advertisement Boards{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Bulk Board Upload</h1>
+            <p class="text-gray-600 text-sm mt-1">Upload multiple board records via Excel</p>
+        </div>
+        <div class="flex items-center space-x-3">
+            <button id="download-template-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium transition-colors flex items-center space-x-2 text-sm opacity-50 cursor-not-allowed" disabled>
+                <i class="fas fa-download"></i>
+                <span>Download Template</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Client Search and Upload Form -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6 border border-gray-100">
+        <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
+            <i class="fas fa-upload text-green-600"></i>
+            <span>Upload Board Data</span>
+        </h2>
+        <div class="flex flex-col sm:flex-row sm:space-x-4 gap-4">
+            <div class="flex-1 relative">
+                <label for="client_name" class="block text-sm font-medium text-gray-700 mb-1">Client Name</label>
+                <input type="text" id="client_name" placeholder="Enter client name (e.g., NISS)" 
+                       class="block w-full px-3 py-2 border border-gray-200 rounded-md shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm">
+                <div id="client-dropdown" class="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto hidden">
+                    <ul id="client-list" class="text-sm text-gray-700"></ul>
+                </div>
+            </div>
+            <div class="flex-1">
+                <label for="excel_file" class="block text-sm font-medium text-gray-700 mb-1">Excel File</label>
+                <input type="file" id="excel_file" accept=".xlsx" 
+                       class="block w-full px-3 py-2 border border-gray-200 rounded-md shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm">
+            </div>
+            <div class="flex items-center space-x-3 sm:mt-7">
+                <button id="upload-btn" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition-colors flex items-center space-x-2 z-10">
+                    <i class="fas fa-upload"></i>
+                    <span>Upload</span>
+                </button>
+                <button id="reset-btn" class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-md transition-colors flex items-center space-x-2 z-10">
+                    <i class="fas fa-undo"></i>
+                    <span>Reset</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let currentClientId = null;
+    const clientNameInput = document.getElementById('client_name');
+    const clientDropdown = document.getElementById('client-dropdown');
+    const clientList = document.getElementById('client-list');
+    const excelFileInput = document.getElementById('excel_file');
+    const uploadBtn = document.getElementById('upload-btn');
+    const downloadTemplateBtn = document.getElementById('download-template-btn');
+    const resetBtn = document.getElementById('reset-btn');
+
+    // Ensure upload button is visible
+    uploadBtn.style.display = 'flex'; // Force visibility
+    uploadBtn.style.visibility = 'visible';
+
+    // Initialize download button state
+    downloadTemplateBtn.addEventListener('click', () => {
+        if (downloadTemplateBtn.disabled) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Select a Client',
+                text: 'Please select a client to enable template download',
+                timer: 2000,
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
+            return;
+        }
+        const url = currentClientId 
+            ? `/client-management/download-excel-template/?client_id=${currentClientId}`
+            : '/client-management/download-excel-template/';
+        console.log('Downloading template from:', url);
+        window.location.href = url;
+    });
+
+    // Reset form
+    resetBtn.addEventListener('click', () => {
+        clientNameInput.value = '';
+        excelFileInput.value = '';
+        clientDropdown.classList.add('hidden');
+        currentClientId = null;
+        downloadTemplateBtn.disabled = true;
+        downloadTemplateBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        Swal.fire({
+            icon: 'success',
+            title: 'Form Reset',
+            text: 'Form has been reset',
+            timer: 1500,
+            timerProgressBar: true,
+            showConfirmButton: false
+        });
+    });
+
+    // Populate client dropdown
+    async function populateClientDropdown(searchTerm) {
+        try {
+            console.log('Fetching clients with search term:', searchTerm);
+            const response = await fetch(`/client-management/clients/?search=${encodeURIComponent(searchTerm)}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const clients = await response.json();
+            console.log('Clients received:', clients);
+            clientList.innerHTML = '';
+            if (clients.length === 0) {
+                clientDropdown.classList.add('hidden');
+                Swal.fire({
+                    icon: 'info',
+                    title: 'No Clients Found',
+                    text: 'No clients match your search. Try a different term.',
+                    timer: 2000,
+                    timerProgressBar: true,
+                    showConfirmButton: false
+                });
+                return;
+            }
+            clients.forEach(client => {
+                const li = document.createElement('li');
+                li.className = 'px-4 py-2 hover:bg-gray-100 cursor-pointer';
+                li.textContent = client.name;
+                li.dataset.clientId = client.id;
+                li.addEventListener('click', () => {
+                    currentClientId = client.id;
+                    clientNameInput.value = client.name;
+                    clientDropdown.classList.add('hidden');
+                    downloadTemplateBtn.disabled = false;
+                    downloadTemplateBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    console.log('Client selected:', { id: currentClientId, name: client.name });
+                });
+                clientList.appendChild(li);
+            });
+            clientDropdown.classList.remove('hidden');
+        } catch (error) {
+            console.error('Error fetching clients:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Failed to load clients. Please try again.',
+                timer: 2000,
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
+        }
+    }
+
+    // Client name input event
+    clientNameInput.addEventListener('input', () => {
+        const searchTerm = clientNameInput.value.trim();
+        console.log('Client input changed:', searchTerm);
+        if (searchTerm.length > 0) {
+            populateClientDropdown(searchTerm);
+        } else {
+            clientDropdown.classList.add('hidden');
+            currentClientId = null;
+            downloadTemplateBtn.disabled = true;
+            downloadTemplateBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+    });
+
+    clientNameInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            const firstClient = clientList.querySelector('li');
+            if (firstClient) {
+                currentClientId = firstClient.dataset.clientId;
+                clientNameInput.value = firstClient.textContent;
+                clientDropdown.classList.add('hidden');
+                downloadTemplateBtn.disabled = false;
+                downloadTemplateBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                console.log('Client selected via Enter:', { id: currentClientId, name: firstClient.textContent });
+            }
+        }
+    });
+
+    // Hide dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!clientDropdown.contains(e.target) && e.target !== clientNameInput) {
+            clientDropdown.classList.add('hidden');
+        }
+    });
+
+    // Upload Excel file
+    uploadBtn.addEventListener('click', async function() {
+        if (!currentClientId) {
+            Swal.fire({
+                icon: 'error',
+                title: 'No Client Selected',
+                text: 'Please select a client first',
+                timer: 2000,
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
+            return;
+        }
+
+        const file = excelFileInput.files[0];
+        if (!file) {
+            Swal.fire({
+                icon: 'error',
+                title: 'No File Selected',
+                text: 'Please select an Excel file to upload',
+                timer: 2000,
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('client_id', currentClientId);
+        console.log('Uploading file with client_id:', currentClientId);
+
+        try {
+            const response = await fetch('/client-management/upload-excel/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: formData
+            });
+            const data = await response.json();
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Upload Successful',
+                    text: data.message,
+                    timer: 1500,
+                    timerProgressBar: true,
+                    showConfirmButton: false
+                });
+                excelFileInput.value = '';
+                clientNameInput.value = '';
+                currentClientId = null;
+                downloadTemplateBtn.disabled = true;
+                downloadTemplateBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                let errorMessage = data.message;
+                if (data.errors) {
+                    errorMessage += '<ul>' + data.errors.map(err => `<li>${err}</li>`).join('') + '</ul>';
+                }
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Upload Failed',
+                    html: errorMessage,
+                    showConfirmButton: true
+                });
+            }
+        } catch (error) {
+            console.error('Error uploading file:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Failed to upload file',
+                timer: 2000,
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
+        }
+    });
+});
+</script>
+{% endblock %}

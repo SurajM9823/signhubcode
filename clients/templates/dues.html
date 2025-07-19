@@ -11,18 +11,31 @@
     showDetailsModal: false,
     selectedClient: null,
     clientDues: [],
+    clientDuesByFiscalYear: {},
     clientTotalDues: 0,
     clientTotalPaid: 0,
     clientTotalRemaining: 0
 }">
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold">Dues Management</h1>
+        <h1 class="text-3xl font-bold">Dues Management {% if active_fiscal_year %}- {{ active_fiscal_year.name }}{% else %}- No Active Fiscal Year{% endif %}</h1>
         <button @click="showForm = !showForm"
                 class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
             <span x-show="!showForm">+ Add Dues</span>
             <span x-show="showForm">– Cancel</span>
         </button>
     </div>
+
+    <!-- Messages -->
+    {% if success_message %}
+    <div class="mb-6 p-4 bg-green-50 border-l-4 border-green-500 text-green-700">
+        <p class="font-medium">{{ success_message }}</p>
+    </div>
+    {% endif %}
+    {% if error_message %}
+    <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700">
+        <p class="font-medium">{{ error_message }}</p>
+    </div>
+    {% endif %}
 
     <!-- Dues Form (Add or Edit) -->
     <div x-show="showForm" x-transition
@@ -34,26 +47,44 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Client</label>
                     {{ form.client }}
+                    {% if form.client.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ form.client.errors.0 }}</p>
+                    {% endif %}
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Amount</label>
                     {{ form.amount }}
+                    {% if form.amount.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ form.amount.errors.0 }}</p>
+                    {% endif %}
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Due Date</label>
                     {{ form.due_date }}
+                    {% if form.due_date.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ form.due_date.errors.0 }}</p>
+                    {% endif %}
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Status</label>
                     {{ form.status }}
+                    {% if form.status.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ form.status.errors.0 }}</p>
+                    {% endif %}
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Payment Date</label>
                     {{ form.payment_date }}
+                    {% if form.payment_date.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ form.payment_date.errors.0 }}</p>
+                    {% endif %}
                 </div>
                 <div class="md:col-span-2">
                     <label class="block text-sm font-medium text-gray-700">Description</label>
                     {{ form.description }}
+                    {% if form.description.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ form.description.errors.0 }}</p>
+                    {% endif %}
                 </div>
             </div>
             <button type="submit"
@@ -66,14 +97,14 @@
     <!-- Mark Paid Form -->
     <div x-show="showMarkPaidForm" x-transition
          class="bg-white p-6 rounded-lg shadow-md mb-6">
-        <h2 class="text-xl font-semibold mb-4">Record Payment</h2>
-        <form method="post" class="space-y-4" action="{% url 'dues_list' %}" @submit="if (!payment_amount || payment_amount <= 0 || payment_amount > totalPendingAmount) { $event.preventDefault(); alert('Payment amount must be a positive number and not exceed the total pending amount.'); }">
+        <h2 class="text-xl font-semibold mb-4">Record Payment for {{ active_fiscal_year.name }}</h2>
+        <form method="post" class="space-y-4" action="{% url 'dues_list' %}" @submit="if (!payment_amount || payment_amount <= 0 || payment_amount > totalPendingAmount) { $event.preventDefault(); alert('Payment amount must be a positive number and not exceed the total pending amount for the active fiscal year.'); }">
             {% csrf_token %}
             <input type="hidden" name="action" value="mark_paid">
             <input type="hidden" name="client_id" x-model="selectedClient ? selectedClient.id : ''">
             <div class="grid grid-cols-1 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Total Amount to Pay</label>
+                    <label class="block text-sm font-medium text-gray-700">Total Amount to Pay (Active Fiscal Year)</label>
                     <input type="text" :value="totalPendingAmount.toFixed(2)" class="border rounded p-2 w-full" disabled>
                 </div>
                 <div>
@@ -113,10 +144,12 @@
                 </table>
             </div>
 
-            <!-- Dues Records -->
+            <!-- Dues Records by Fiscal Year -->
             <div class="mb-6">
                 <h3 class="text-lg font-medium mb-2">Dues Records</h3>
-                <table class="min-w-full divide-y divide-gray-200">
+                <!-- Active Fiscal Year Dues -->
+                <h4 class="text-md font-semibold mb-2">{{ active_fiscal_year.name }} Dues</h4>
+                <table class="min-w-full divide-y divide-gray-200 mb-4">
                     <thead class="bg-gray-50">
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
@@ -129,7 +162,7 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                        <template x-for="due in clientDues" :key="due.id">
+                        <template x-for="due in clientDues.filter(d => d.fiscal_year === '{{ active_fiscal_year.name|escapejs }}')" :key="due.id">
                             <tr>
                                 <td class="px-6 py-4 whitespace-nowrap" x-text="due.description || '—'"></td>
                                 <td class="px-6 py-4 whitespace-nowrap">$<span x-text="due.amount.toFixed(2)"></span></td>
@@ -140,11 +173,44 @@
                                 <td class="px-6 py-4 whitespace-nowrap" x-text="due.status"></td>
                             </tr>
                         </template>
-                        <tr x-show="!clientDues.length">
-                            <td colspan="7" class="px-6 py-4 text-center">No dues records available.</td>
+                        <tr x-show="!clientDues.filter(d => d.fiscal_year === '{{ active_fiscal_year.name|escapejs }}').length">
+                            <td colspan="7" class="px-6 py-4 text-center">No dues records for {{ active_fiscal_year.name }}.</td>
                         </tr>
                     </tbody>
                 </table>
+
+                <!-- Non-Active Fiscal Year Dues -->
+                <template x-for="fy in Object.keys(clientDuesByFiscalYear)" :key="fy">
+                    <div>
+                        <h4 class="text-md font-semibold mb-2" x-text="fy + ' Dues'"></h4>
+                        <table class="min-w-full divide-y divide-gray-200 mb-4">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Paid Amount</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Remaining Amount</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due Date</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Date</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <template x-for="due in clientDuesByFiscalYear[fy]" :key="due.id">
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap" x-text="due.description || '—'"></td>
+                                        <td class="px-6 py-4 whitespace-nowrap">$<span x-text="due.amount.toFixed(2)"></span></td>
+                                        <td class="px-6 py-4 whitespace-nowrap">$<span x-text="due.paid_amount.toFixed(2)"></span></td>
+                                        <td class="px-6 py-4 whitespace-nowrap">$<span x-text="due.remaining_amount.toFixed(2)"></span></td>
+                                        <td class="px-6 py-4 whitespace-nowrap" x-text="due.due_date"></td>
+                                        <td class="px-6 py-4 whitespace-nowrap" x-text="due.payment_date || '—'"></td>
+                                        <td class="px-6 py-4 whitespace-nowrap" x-text="due.status"></td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </template>
             </div>
             
             <button @click="showDetailsModal = false" class="mt-4 w-full bg-red-600 text-white p-2 rounded-md hover:bg-red-700 transition">Close</button>
@@ -166,143 +232,174 @@
             </div>
         </div>
         <div class="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
-        <table class="min-w-full divide-y divide-gray-200 table-fixed">
-            <thead class="bg-gradient-to-r from-blue-600 to-indigo-700">
-                <tr>
-                    <th class="px-3 py-2 text-left text-xs font-medium text-white uppercase tracking-wider w-12">S.N.</th>
-                    <th class="px-3 py-2 text-left text-xs font-medium text-white uppercase tracking-wider w-40">Client</th>
-                    <th class="px-3 py-2 text-left text-xs font-medium text-white uppercase tracking-wider w-28">Amount</th>
-                    <th class="px-3 py-2 text-left text-xs font-medium text-white uppercase tracking-wider w-28">Paid</th>
-                    <th class="px-3 py-2 text-left text-xs font-medium text-white uppercase tracking-wider w-28">Remaining</th>
-                    <th class="px-3 py-2 text-left text-xs font-medium text-white uppercase tracking-wider w-28">Due Date</th>
-                    <th class="px-3 py-2 text-left text-xs font-medium text-white uppercase tracking-wider w-20">Status</th>
-                    <th class="px-3 py-2 text-left text-xs font-medium text-white uppercase tracking-wider w-28">Payment Date</th>
-                    <th class="px-3 py-2 text-left text-xs font-medium text-white uppercase tracking-wider w-32">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-                {% for data in client_data %}
-                <tr class="hover:bg-gray-50 transition-colors even:bg-gray-50">
-                    <td class="px-3 py-2 whitespace-nowrap text-gray-700 text-sm">{{ forloop.counter }}</td>
-                    <td class="px-3 py-2 whitespace-nowrap font-medium text-gray-900 text-sm truncate">{{ data.client.name }}</td>
-                    <td class="px-3 py-2 whitespace-nowrap text-gray-700 text-sm">${{ data.total_dues|floatformat:2 }}</td>
-                    <td class="px-3 py-2 whitespace-nowrap text-gray-700 text-sm">${{ data.total_paid|floatformat:2 }}</td>
-                    <td class="px-3 py-2 whitespace-nowrap font-medium text-sm {% if data.total_remaining > 0 %}text-red-600{% else %}text-green-600{% endif %}">${{ data.total_remaining|floatformat:2 }}</td>
-                    <td class="px-3 py-2 whitespace-nowrap text-gray-700 text-sm">{{ data.latest_due_date }}</td>
-                    <td class="px-3 py-2 whitespace-nowrap text-sm">
-                        <span class="px-2 py-1 inline-flex text-xs leading-4 font-semibold rounded-full {% if data.status == 'Paid' %}bg-green-100 text-green-800{% elif data.status == 'Partial' %}bg-yellow-100 text-yellow-800{% else %}bg-red-100 text-red-800{% endif %}">{{ data.status }}</span>
-                    </td>
-                    <td class="px-3 py-2 whitespace-nowrap text-gray-700 text-sm">{{ data.latest_payment_date|default:"—" }}</td>
-                    <td class="px-3 py-2 whitespace-nowrap text-sm">
-                        <div class="flex space-x-1">
-                            <a href="#" @click.prevent="showDetailsModal = true; 
-                                selectedClient = { 
-                                    id: '{{ data.client.id }}',
-                                    name: '{{ data.client.name|escapejs }}', 
-                                    registration_date: '{{ data.client.registration_date }}' 
-                                }; 
-                                clientDues = [
-                                    {% for d in data.client.dues_records.all %}
-                                    { 
-                                        id: '{{ d.pk }}',
-                                        description: '{{ d.description|escapejs }}', 
-                                        amount: {{ d.amount }}, 
-                                        paid_amount: {{ d.paid_amount }}, 
-                                        remaining_amount: {{ d.remaining_amount }}, 
-                                        due_date: '{{ d.due_date }}', 
-                                        payment_date: '{{ d.payment_date|default:"—" }}', 
-                                        status: '{{ d.status }}' 
-                                    }{% if not forloop.last %},{% endif %}
-                                    {% endfor %}
-                                ]; 
-                                clientTotalDues = clientDues.reduce((sum, d) => sum + d.amount, 0);
-                                clientTotalPaid = clientDues.reduce((sum, d) => sum + d.paid_amount, 0);
-                                clientTotalRemaining = clientDues.reduce((sum, d) => sum + d.remaining_amount, 0);" 
-                                class="text-blue-600 hover:text-blue-900 p-1 rounded-md hover:bg-blue-50" title="View Details">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                            </a>
-                            <a href="{% url 'dues_list' data.latest_due_id %}" class="text-indigo-600 hover:text-indigo-900 p-1 rounded-md hover:bg-indigo-50" title="Edit">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                            </a>
-                            {% if data.status != 'Paid' %}
-                            <a href="#" @click.prevent="showMarkPaidForm = true; 
-                                totalPendingAmount = {{ data.total_pending_amount|floatformat:2 }};
-                                selectedClient = { 
-                                    id: '{{ data.client.id }}',
-                                    name: '{{ data.client.name|escapejs }}', 
-                                    registration_date: '{{ data.client.registration_date }}' 
-                                };" 
-                                class="text-green-600 hover:text-green-900 p-1 rounded-md hover:bg-green-50" title="Mark Paid">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            </a>
+            <table class="min-w-full divide-y divide-gray-200 table-fixed">
+                <thead class="bg-gradient-to-r from-blue-600 to-indigo-700">
+                    <tr>
+                        <th class="px-3 py-2 text-left text-xs font-medium text-white uppercase tracking-wider w-12">S.N.</th>
+                        <th class="px-3 py-2 text-left text-xs font-medium text-white uppercase tracking-wider w-40">Client</th>
+                        <th class="px-3 py-2 text-left text-xs font-medium text-white uppercase tracking-wider w-28">Amount</th>
+                        <th class="px-3 py-2 text-left text-xs font-medium text-white uppercase tracking-wider w-28">Paid</th>
+                        <th class="px-3 py-2 text-left text-xs font-medium text-white uppercase tracking-wider w-28">Remaining</th>
+                        <th class="px-3 py-2 text-left text-xs font-medium text-white uppercase tracking-wider w-28">Due Date</th>
+                        <th class="px-3 py-2 text-left text-xs font-medium text-white uppercase tracking-wider w-20">Status</th>
+                        <th class="px-3 py-2 text-left text-xs font-medium text-white uppercase tracking-wider w-28">Payment Date</th>
+                        <th class="px-3 py-2 text-left text-xs font-medium text-white uppercase tracking-wider w-28">Includes Past FY</th>
+                        <th class="px-3 py-2 text-left text-xs font-medium text-white uppercase tracking-wider w-32">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for data in client_data %}
+                    <tr class="hover:bg-gray-50 transition-colors even:bg-gray-50">
+                        <td class="px-3 py-2 whitespace-nowrap text-gray-700 text-sm">{{ forloop.counter }}</td>
+                        <td class="px-3 py-2 whitespace-nowrap font-medium text-gray-900 text-sm truncate">{{ data.client.name }} ({{ data.client.fiscal_year.name }})</td>
+                        <td class="px-3 py-2 whitespace-nowrap text-gray-700 text-sm">${{ data.total_dues|floatformat:2 }}</td>
+                        <td class="px-3 py-2 whitespace-nowrap text-gray-700 text-sm">${{ data.total_paid|floatformat:2 }}</td>
+                        <td class="px-3 py-2 whitespace-nowrap font-medium text-sm {% if data.total_remaining > 0 %}text-red-600{% else %}text-green-600{% endif %}">${{ data.total_remaining|floatformat:2 }}</td>
+                        <td class="px-3 py-2 whitespace-nowrap text-gray-700 text-sm">{{ data.latest_due_date }}</td>
+                        <td class="px-3 py-2 whitespace-nowrap text-sm">
+                            <span class="px-2 py-1 inline-flex text-xs leading-4 font-semibold rounded-full {% if data.status == 'Paid' %}bg-green-100 text-green-800{% elif data.status == 'Partially Paid' %}bg-yellow-100 text-yellow-800{% else %}bg-red-100 text-red-800{% endif %}">{{ data.status }}</span>
+                        </td>
+                        <td class="px-3 py-2 whitespace-nowrap text-gray-700 text-sm">{{ data.latest_payment_date|default:"—" }}</td>
+                        <td class="px-3 py-2 whitespace-nowrap text-sm">
+                            {% if data.non_active_dues_by_fy %}
+                                <span class="text-yellow-600">Yes ({{ data.non_active_dues_by_fy.keys|join:", " }})</span>
+                            {% else %}
+                                <span class="text-gray-600">No</span>
                             {% endif %}
-                            <form method="post" action="{% url 'dues_list' %}" class="inline">
-                                {% csrf_token %}
-                                <input type="hidden" name="action" value="delete">
-                                <input type="hidden" name="dues_id" value="{{ data.latest_due_id }}">
-                                <button type="submit" class="text-red-600 hover:text-red-900 p-1 rounded-md hover:bg-red-50" title="Delete">
+                        </td>
+                        <td class="px-3 py-2 whitespace-nowrap text-sm">
+                            <div class="flex space-x-1">
+                                <a href="#" @click.prevent="showDetailsModal = true; 
+                                    selectedClient = { 
+                                        id: '{{ data.client.id }}',
+                                        name: '{{ data.client.name|escapejs }}', 
+                                        registration_date: '{{ data.client.registration_date }}' 
+                                    }; 
+                                    clientDues = [
+                                        {% for d in data.active_fiscal_year_dues %}
+                                        { 
+                                            id: '{{ d.pk }}',
+                                            description: '{{ d.description|escapejs }}', 
+                                            amount: {{ d.amount }}, 
+                                            paid_amount: {{ d.paid_amount }}, 
+                                            remaining_amount: {{ d.remaining_amount }}, 
+                                            due_date: '{{ d.due_date }}', 
+                                            payment_date: '{{ d.payment_date|default:"—" }}', 
+                                            status: '{{ d.status }}',
+                                            fiscal_year: '{{ d.fiscal_year.name|escapejs }}'
+                                        },
+                                        {% endfor %}
+                                    ]; 
+                                    clientDuesByFiscalYear = {
+                                        {% for fy_name, fy_data in data.non_active_dues_by_fy.items %}
+                                        '{{ fy_name|escapejs }}': [
+                                            {% for d in fy_data.dues %}
+                                            { 
+                                                id: '{{ d.pk }}',
+                                                description: '{{ d.description|escapejs }}', 
+                                                amount: {{ d.amount }}, 
+                                                paid_amount: {{ d.paid_amount }}, 
+                                                remaining_amount: {{ d.remaining_amount }}, 
+                                                due_date: '{{ d.due_date }}', 
+                                                payment_date: '{{ d.payment_date|default:"—" }}', 
+                                                status: '{{ d.status }}',
+                                                fiscal_year: '{{ d.fiscal_year.name|escapejs }}'
+                                            }{% if not forloop.last %},{% endif %}
+                                            {% endfor %}
+                                        ]{% if not forloop.last %},{% endif %}
+                                        {% endfor %}
+                                    };
+                                    clientTotalDues = {{ data.total_dues }};
+                                    clientTotalPaid = {{ data.total_paid }};
+                                    clientTotalRemaining = {{ data.total_remaining }};" 
+                                    class="text-blue-600 hover:text-blue-900 p-1 rounded-md hover:bg-blue-50" title="View Details">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                </a>
+                                <a href="{% url 'dues_list' data.latest_due_id %}" class="text-indigo-600 hover:text-indigo-900 p-1 rounded-md hover:bg-indigo-50" title="Edit" x-show="'{{ data.latest_due_id }}' !== '0'">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                </a>
+                                {% if data.status != 'Paid' %}
+                                <a href="#" @click.prevent="showMarkPaidForm = true; 
+                                    totalPendingAmount = {{ data.total_pending_amount }}; 
+                                    selectedClient = { 
+                                        id: '{{ data.client.id }}',
+                                        name: '{{ data.client.name|escapejs }}', 
+                                        registration_date: '{{ data.client.registration_date }}' 
+                                    };" 
+                                    class="text-green-600 hover:text-green-900 p-1 rounded-md hover:bg-green-50" title="Mark Paid">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                </a>
+                                {% endif %}
+                                <a href="#" @click.prevent="confirmDelete('{{ data.oldest_due_id }}', '{{ data.client.name|escapejs }}')" class="text-red-600 hover:text-red-900 p-1 rounded-md hover:bg-red-50" title="Delete" x-show="'{{ data.oldest_due_id }}' !== '0'">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                </button>
-                            </form>
-                        </div>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="9" class="px-6 py-8 text-center text-gray-500">
-                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                        <p class="mt-2 text-sm">No dues available.</p>
-                        <p class="mt-1 text-sm">Click the "Add Dues" button to create your first dues record.</p>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        </div>
-        
-        <!-- Pagination -->
-        <div class="mt-4 flex items-center justify-between">
-            <div class="text-sm text-gray-700">
-                Showing <span class="font-medium">1</span> to <span class="font-medium">{{ client_data|length }}</span> of <span class="font-medium">{{ client_data|length }}</span> entries
-            </div>
-            <div class="flex space-x-1">
-                <button class="px-3 py-1 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300 disabled:opacity-50" disabled>
-                    Previous
-                </button>
-                <button class="px-3 py-1 rounded-md bg-blue-600 text-white hover:bg-blue-700">
-                    1
-                </button>
-                <button class="px-3 py-1 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300 disabled:opacity-50" disabled>
-                    Next
-                </button>
-            </div>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="10" class="px-6 py-8 text-center text-gray-500">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                            <p class="mt-2 text-sm">No dues records available.</p>
+                            <p class="mt-1 text-sm">Click the "Add Dues" button to create your first dues record.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
-</div>
 
-<script>
-    // Dues search functionality
-    document.addEventListener('DOMContentLoaded', function() {
-        const searchInput = document.getElementById('duesSearch');
-        if (searchInput) {
-            searchInput.addEventListener('keyup', function() {
-                const searchValue = this.value.toLowerCase();
-                const rows = document.querySelectorAll('tbody tr');
+    <!-- Delete Dues Form (Hidden) -->
+    <form id="deleteDuesForm" method="post" action="{% url 'dues_list' %}" style="display: none;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="delete">
+        <input type="hidden" name="dues_id" id="deleteDuesId">
+    </form>
+
+    <script>
+        document.getElementById('duesSearch').addEventListener('keyup', function() {
+            const searchValue = this.value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr');
+            
+            rows.forEach(row => {
+                const client = row.children[1].textContent.toLowerCase();
+                const status = row.children[6].textContent.toLowerCase();
+                const pastFY = row.children[8].textContent.toLowerCase();
                 
-                rows.forEach(row => {
-                    if (!row.children || row.children.length < 2) return;
-                    
-                    const clientName = row.children[1].textContent.toLowerCase();
-                    const status = row.querySelector('span') ? row.querySelector('span').textContent.toLowerCase() : '';
-                    
-                    if (clientName.includes(searchValue) || status.includes(searchValue)) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
-                    }
-                });
+                if (client.includes(searchValue) || status.includes(searchValue) || pastFY.includes(searchValue)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+
+        function confirmDelete(duesId, clientName) {
+            event.preventDefault();
+            Swal.fire({
+                title: 'Delete Dues?',
+                text: `Are you sure you want to delete the dues for ${clientName}? This action cannot be undone.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('deleteDuesId').value = duesId;
+                    document.getElementById('deleteDuesForm').submit();
+                }
             });
         }
-    });
-</script>
+
+        document.addEventListener('DOMContentLoaded', function() {
+            {% if form.errors or error_message %}
+                if (!Alpine.store('showForm')) {
+                    document.querySelector('[x-data]').__x.$data.showForm = true;
+                }
+            {% endif %}
+        });
+    </script>
+</div>
 {% endblock %}

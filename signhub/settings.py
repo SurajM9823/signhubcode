@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -56,8 +57,15 @@ WSGI_APPLICATION = 'signhub.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',  # MariaDB uses the MySQL backend
+        'NAME': 'signhub',
+        'USER': 'root',
+        'PASSWORD': 'root',
+        'HOST': 'localhost',  # or the IP address of your MariaDB server
+        'PORT': '3306',       # default port for MariaDB/MySQL
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
+        }
     }
 }
 
@@ -88,3 +96,5 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': 60.0,
     },
 }
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

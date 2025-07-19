@@ -1,0 +1,1114 @@
+{% extends 'base_authenticated.html' %}
+{% load static %}
+
+{% block title %}Reports Management - Advertisement Boards{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Reports Management</h1>
+            <p class="text-gray-600 text-sm mt-1">Generate and download advertisement board statements or application letters</p>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6 border border-gray-100">
+        <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
+            <i class="fas fa-filter text-teal-600"></i>
+            <span>Filter Reports</span>
+        </h2>
+        <div class="flex flex-col sm:flex-row sm:space-x-4 gap-4">
+            <div class="flex-1 relative">
+                <label for="client_name" class="block text-sm font-medium text-gray-700 mb-1">Client Name</label>
+                <input type="text" id="client_name" placeholder="Enter client name (e.g., NISS)" 
+                       class="block w-full px-3 py-2 border border-gray-200 rounded-md shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm">
+                <div id="client-dropdown" class="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto hidden">
+                    <ul id="client-list" class="text-sm text-gray-700"></ul>
+                </div>
+            </div>
+            <div class="flex-1">
+                <label for="client_id" class="block text-sm font-medium text-gray-700 mb-1">Client ID</label>
+                <input type="text" id="client_id" placeholder="Enter client ID" readonly
+                       class="block w-full px-3 py-2 border border-gray-200 rounded-md bg-gray-100 text-sm">
+            </div>
+            <div class="flex-1">
+                <label for="fiscal_year" class="block text-sm font-medium text-gray-700 mb-1">Fiscal Year</label>
+                <select id="fiscal_year" disabled class="w-full px-3 py-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm">
+                    <option value="">Select Fiscal Year</option>
+                </select>
+            </div>
+            <div class="flex-1">
+                <label for="month" class="block text-sm font-medium text-gray-700 mb-1">Month</label>
+                <select id="month" disabled class="w-full px-3 py-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm">
+                    <option value="">Select Month</option>
+                </select>
+            </div>
+        </div>
+        <div class="flex flex-col sm:flex-row sm:space-x-4 gap-4 mt-4">
+            <div class="flex items-center">
+                <input type="checkbox" id="include_previous_dues" class="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-200 rounded">
+                <label for="include_previous_dues" class="ml-2 text-sm font-medium text-gray-700">Include Previous Dues</label>
+            </div>
+            <div class="flex items-center">
+                <input type="checkbox" id="include_vat" class="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-200 rounded">
+                <label for="include_vat" class="ml-2 text-sm font-medium text-gray-700">Include VAT</label>
+            </div>
+        </div>
+        <div class="flex space-x-3 mt-6">
+            <button id="generate-statement-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium transition-colors flex items-center space-x-2">
+                <i class="fas fa-file-alt"></i>
+                <span>Generate Statement</span>
+            </button>
+            <button id="generate-application-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md font-medium transition-colors flex items-center space-x-2">
+                <i class="fas fa-file-alt"></i>
+                <span>Generate Application Letter</span>
+            </button>
+            <button id="clear-btn" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md font-medium transition-colors flex items-center space-x-2">
+                <i class="fas fa-undo"></i>
+                <span>Clear</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Statement Section -->
+    <div id="statement-container" class="bg-white rounded-lg shadow-md p-6 mb-6 border border-gray-100 hidden">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-semibold text-gray-800 flex items-center space-x-2">
+                <i class="fas fa-file-alt text-blue-600"></i>
+                <span>Statement of Account</span>
+            </h2>
+            <div class="flex space-x-3">
+                <button id="download-statement-btn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md font-medium transition-colors flex items-center space-x-2">
+                    <i class="fas fa-download"></i>
+                    <span>Download PDF</span>
+                </button>
+                <button id="print-statement-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium transition-colors flex items-center space-x-2">
+                    <i class="fas fa-print"></i>
+                    <span>Print</span>
+                </button>
+            </div>
+        </div>
+        <div id="statement-content" class="border border-gray-200 p-4 rounded-md box-shadow"></div>
+    </div>
+
+    <!-- Application Letter Section -->
+    <div id="application-container" class="bg-white rounded-lg shadow-md p-6 mb-6 border border-gray-100 hidden">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-semibold text-gray-800 flex items-center space-x-2">
+                <i class="fas fa-file-alt text-indigo-600"></i>
+                <span>Application Letter</span>
+            </h2>
+            <div class="flex space-x-3">
+                <button id="download-application-btn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md font-medium transition-colors flex items-center space-x-2">
+                    <i class="fas fa-download"></i>
+ target="_blank">Download PDF</span>
+                </button>
+                <button id="print-application-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md font-medium transition-colors flex items-center space-x-2">
+                    <i class="fas fa-print"></i>
+                    <span>Print</span>
+                </button>
+            </div>
+        </div>
+        <div id="application-content" class="border border-gray-200 p-4 rounded-md box-shadow"></div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async function() {
+    const { jsPDF } = window.jspdf;
+    let currentClientId = null;
+    let currentFiscalYearId = null;
+    let currentMonth = null;
+    let companyCreationDate = new Date('2020-01-01');
+    let currentDate = new Date('2025-07-19');
+    let statementData = null;
+    let userData = null;
+
+    // Fetch logged-in user details
+    async function fetchUserDetails() {
+        try {
+            const response = await fetch('/reports-management/user-details/', {
+                method: 'GET',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Accept': 'application/json'
+                },
+                credentials: 'include'
+            });
+            if (!response.ok) {
+                const text = await response.text();
+                console.error('Fetch user details error:', response.status, text);
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            const data = await response.json();
+            if (data.success) {
+                userData = data.user;
+            } else {
+                console.error('Failed to fetch user details:', data.message);
+                Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to fetch user details: ' + data.message, timer: 2000, timerProgressBar: true, showConfirmButton: false });
+            }
+        } catch (error) {
+            console.error('Error fetching user details:', error);
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to fetch user details: ' + error.message, timer: 2000, timerProgressBar: true, showConfirmButton: false });
+        }
+    }
+
+    // Get display name for user
+    function getUserDisplayName() {
+        if (!userData) return 'Unknown';
+        if (userData.first_name && userData.last_name) return `${userData.first_name} ${userData.last_name}`;
+        if (userData.first_name) return userData.first_name;
+        if (userData.username) return userData.username;
+        return userData.email || 'Unknown';
+    }
+
+    // DOM elements
+    const clientNameInput = document.getElementById('client_name');
+    const clientIdInput = document.getElementById('client_id');
+    const clientDropdown = document.getElementById('client-dropdown');
+    const clientList = document.getElementById('client-list');
+    const fiscalYearSelect = document.getElementById('fiscal_year');
+    const monthSelect = document.getElementById('month');
+    const includePreviousDues = document.getElementById('include_previous_dues');
+    const includeVat = document.getElementById('include_vat');
+    const generateStatementBtn = document.getElementById('generate-statement-btn');
+    const generateApplicationBtn = document.getElementById('generate-application-btn');
+    const clearBtn = document.getElementById('clear-btn');
+    const downloadStatementBtn = document.getElementById('download-statement-btn');
+    const printStatementBtn = document.getElementById('print-statement-btn');
+    const statementContainer = document.getElementById('statement-container');
+    const statementContent = document.getElementById('statement-content');
+    const applicationContainer = document.getElementById('application-container');
+    const applicationContent = document.getElementById('application-content');
+    const downloadApplicationBtn = document.getElementById('download-application-btn');
+    const printApplicationBtn = document.getElementById('print-application-btn');
+
+    // Initialize
+    async function initializeFilters() {
+        includePreviousDues.checked = false;
+        includeVat.checked = true;
+        await fetchUserDetails();
+        clientNameInput.focus();
+    }
+
+    // Populate client dropdown
+    async function populateClientDropdown(searchTerm) {
+        try {
+            const response = await fetch(`/client-management/clients/?search=${encodeURIComponent(searchTerm)}`);
+            const clients = await response.json();
+            clientList.innerHTML = '';
+            if (clients.length === 0) {
+                clientDropdown.classList.add('hidden');
+                return;
+            }
+            clients.forEach(client => {
+                const li = document.createElement('li');
+                li.className = 'px-4 py-2 hover:bg-gray-100 cursor-pointer';
+                li.textContent = client.name;
+                li.dataset.clientId = client.id;
+                li.dataset.registrationDate = client.registration_date;
+                li.addEventListener('click', () => {
+                    currentClientId = client.id;
+                    clientNameInput.value = client.name;
+                    clientIdInput.value = client.id;
+                    clientDropdown.classList.add('hidden');
+                    fetchFiscalYears(client.registration_date);
+                });
+                clientList.appendChild(li);
+            });
+            clientDropdown.classList.remove('hidden');
+        } catch (error) {
+            console.error('Error fetching clients:', error);
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to load clients', timer: 2000, timerProgressBar: true, showConfirmButton: false });
+        }
+    }
+
+    // Fetch fiscal years based on client registration date
+    async function fetchFiscalYears(registrationDate) {
+        try {
+            const response = await fetch('/reports-management/fiscal-years/');
+            const data = await response.json();
+            if (data.success) {
+                const clientRegDate = new Date(registrationDate);
+                fiscalYearSelect.innerHTML = '<option value="">Select Fiscal Year</option>';
+                monthSelect.innerHTML = '<option value="">Select Month</option>';
+                data.fiscal_years.forEach(year => {
+                    const yearStartDate = new Date(year.created_at);
+                    if (yearStartDate >= clientRegDate || year.is_active) {
+                        const option = document.createElement('option');
+                        option.value = year.id;
+                        option.textContent = year.name;
+                        option.dataset.createdAt = year.created_at;
+                        option.dataset.isActive = year.is_active;
+                        if (year.is_active) {
+                            option.selected = true;
+                            currentFiscalYearId = year.id;
+                            populateMonths(year.created_at, year.is_active);
+                        }
+                        fiscalYearSelect.appendChild(option);
+                    }
+                });
+                fiscalYearSelect.disabled = false;
+                if (fiscalYearSelect.options.length === 1) {
+                    fiscalYearSelect.disabled = true;
+                    Swal.fire({ icon: 'info', title: 'No Fiscal Years', text: 'No fiscal years available for this client', timer: 2000, timerProgressBar: true, showConfirmButton: false });
+                }
+            } else {
+                Swal.fire({ icon: 'error', title: 'Error', text: data.message || 'Failed to load fiscal years', timer: 2000, timerProgressBar: true, showConfirmButton: false });
+            }
+        } catch (error) {
+            console.error('Error fetching fiscal years:', error);
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to load fiscal years', timer: 2000, timerProgressBar: true, showConfirmButton: false });
+        }
+    }
+
+    // Populate months based on fiscal year
+    function populateMonths(fiscalYearCreatedAt, isActive) {
+        const months = [
+            { value: '01', name: 'January' }, { value: '02', name: 'February' }, { value: '03', name: 'March' },
+            { value: '04', name: 'April' }, { value: '05', name: 'May' }, { value: '06', name: 'June' },
+            { value: '07', name: 'July' }, { value: '08', name: 'August' }, { value: '09', name: 'September' },
+            { value: '10', name: 'October' }, { value: '11', name: 'November' }, { value: '12', name: 'December' }
+        ];
+        monthSelect.innerHTML = '<option value="">Select Month</option>';
+        const fiscalYearDate = new Date(fiscalYearCreatedAt);
+        const fiscalYear = fiscalYearDate.getFullYear();
+        months.forEach(month => {
+            const monthDate = new Date(`${fiscalYear}-${month.value}-01`);
+            if (monthDate <= currentDate && (isActive || monthDate >= fiscalYearDate)) {
+                const option = document.createElement('option');
+                option.value = month.value;
+                option.textContent = month.name;
+                monthSelect.appendChild(option);
+            }
+        });
+        monthSelect.disabled = monthSelect.options.length === 1;
+    }
+
+    // Generate statement or application letter
+    async function generateReport(type) {
+        if (!currentClientId) {
+            Swal.fire({ icon: 'error', title: 'Missing Client', text: 'Please select a client', timer: 2000, timerProgressBar: true, showConfirmButton: false });
+            return;
+        }
+        if (!currentFiscalYearId) {
+            Swal.fire({ icon: 'error', title: 'Missing Fiscal Year', text: 'Please select a fiscal year', timer: 2000, timerProgressBar: true, showConfirmButton: false });
+            return;
+        }
+
+        const includeVatChecked = includeVat.checked;
+        const vatConfirmation = includeVatChecked ? await Swal.fire({
+            title: 'Include VAT?',
+            text: `Do you want to include VAT in the ${type}?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes',
+            cancelButtonText: 'No'
+        }) : { isConfirmed: false };
+
+        const payload = {
+            fiscal_year_id: currentFiscalYearId,
+            include_previous_dues: includePreviousDues.checked,
+            client_id: currentClientId,
+            month: monthSelect.value || null,
+            include_vat: vatConfirmation.isConfirmed
+        };
+
+        try {
+            console.log(`Generating ${type} with payload:`, payload);
+            const response = await fetch('/reports-management/statement/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) {
+                const text = await response.text();
+                console.error(`Generate ${type} error:`, response.status, text);
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            const data = await response.json();
+            console.log(`${type} data:`, data);
+            if (data.success) {
+                statementData = data;
+                if (type === 'statement') {
+                    renderStatement(data);
+                    statementContainer.classList.remove('hidden');
+                    applicationContainer.classList.add('hidden');
+                } else {
+                    renderApplicationLetter(data);
+                    applicationContainer.classList.remove('hidden');
+                    statementContainer.classList.add('hidden');
+                }
+                fiscalYearSelect.disabled = true;
+                monthSelect.disabled = true;
+            } else {
+                Swal.fire({ icon: 'error', title: 'Error', text: data.message || `Failed to generate ${type}`, timer: 2000, timerProgressBar: true, showConfirmButton: false });
+                statementContainer.classList.add('hidden');
+                applicationContainer.classList.add('hidden');
+            }
+        } catch (error) {
+            console.error(`Error generating ${type}:`, error);
+            Swal.fire({ icon: 'error', title: 'Error', text: `Failed to generate ${type}: ` + error.message, timer: 2000, timerProgressBar: true, showConfirmButton: false });
+        }
+    }
+
+    // Render statement
+    function renderStatement(data) {
+        const client = data.client;
+        const company = data.company || {
+            name: 'SignHub Pvt Ltd',
+            address: 'Gausala, Kathmandu, Nepal',
+            email: 'info@signhub.com',
+            phone: '+977-1-1234567',
+            vat_id: '123456',
+            logo_url: ''
+        };
+        const boards = data.boards;
+        const summary = data.summary;
+        const fiscalYear = fiscalYearSelect.options[fiscalYearSelect.selectedIndex].text;
+        const monthName = monthSelect.value ? monthSelect.options[monthSelect.selectedIndex].text : 'All Months';
+        const userDisplayName = getUserDisplayName();
+        const vatPercentage = summary.vat_amount > 0 ? (summary.vat_amount / summary.total_charges * 100).toFixed(2) : '0.00';
+
+        let statementHtml = `
+            <div style="font-family: 'Helvetica', sans-serif; font-size: 10pt; width: 100%; max-width: 1000px; margin: 0 auto; padding: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <!-- Header -->
+                <div style="text-align: center; margin-bottom: 8px;">
+                    ${company.logo_url ? `<img src="${company.logo_url}" alt="Company Logo" style="width: 80px; height: auto; margin-bottom: 5px;">` : ''}
+                    <h1 style="font-size: 14pt; font-weight: bold; margin: 0; line-height: 1.2; color: #1a5276;">${company.name}</h1>
+                    <p style="font-size: 8pt; margin: 0; line-height: 1.2; color: #333;">${company.address}</p>
+                    <p style="font-size: 8pt; margin: 0; line-height: 1.2; color: #333;">${company.email} | ${company.phone}</p>
+                    ${company.vat_id ? `<p style="font-size: 8pt; margin: 0; line-height: 1.2; color: #333;">VAT ID: ${company.vat_id}</p>` : ''}
+                </div>
+                <div style="text-align: center; margin-bottom: 8px;">
+                    <h2 style="font-size: 12pt; font-weight: bold; margin: 0; line-height: 1.2; color: #1a5276;">Statement of Account</h2>
+                </div>
+                <!-- Slogan -->
+                <div style="text-align: center; font-size: 8pt; color: #555; margin-bottom: 8px;">
+                    <p style="margin: 0; font-style: italic;">"Empowering Your Brand with Precision and Clarity"</p>
+                </div>
+                <!-- Horizontal Line -->
+                <hr style="border: none; border-top: 1px solid #666; margin: 8px 0;">
+                <!-- Client and Date Info -->
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 8pt; color: #333;">
+                    <div style="flex: 1;">
+                        <p style="margin: 2px 0;"><strong>Client:</strong> ${client.name}</p>
+                        <p style="margin: 2px 0;"><strong>Email:</strong> ${client.email}</p>
+                    </div>
+                    <div style="flex: 1;">
+                        <p style="margin: 2px 0;"><strong>Address:</strong> ${client.address}</p>
+                        <p style="margin: 2px 0;"><strong>VAT ID:</strong> ${client.vat_id || 'N/A'}</p>
+                    </div>
+                    <div style="flex: 1; text-align: right;">
+                        <p style="margin: 2px 0;"><strong>Date:</strong> ${new Date().toISOString().split('T')[0]}</p>
+                        <p style="margin: 2px 0;"><strong>Fiscal Year:</strong> ${fiscalYear}</p>
+                        <p style="margin: 2px 0;"><strong>Month:</strong> ${monthName}</p>
+                    </div>
+                </div>
+                <!-- Board Details -->
+                <div style="margin-bottom: 8px;">
+                    <h3 style="font-size: 11pt; font-weight: bold; margin: 0 0 5px 0; color: #1a5276;">Board Details</h3>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 8pt;">
+                        <thead style="background-color: #e6f3fa;">
+                            <tr>
+                                <th style="border: 1px solid #666; padding: 3px; text-align: left; font-weight: bold;">S.N.</th>
+                                <th style="border: 1px solid #666; padding: 3px; text-align: left; font-weight: bold;">Shop Name</th>
+                                <th style="border: 1px solid #666; padding: 3px; text-align: left; font-weight: bold;">Brand</th>
+                                <th style="border: 1px solid #666; padding: 3px; text-align: left; font-weight: bold;">Address</th>
+                                <th style="border: 1px solid #666; padding: 3px; text-align: right; font-weight: bold;">H (ft)</th>
+                                <th style="border: 1px solid #666; padding: 3px; text-align: right; font-weight: bold;">W (ft)</th>
+                                <th style="border: 1px solid #666; padding: 3px; text-align: right; font-weight: bold;">Qty</th>
+                                <th style="border: 1px solid #666; padding: 3px; text-align: right; font-weight: bold;">T.Sq. (sqft)</th>
+                                <th style="border: 1px solid #666; padding: 3px; text-align: right; font-weight: bold;">Rate (NPR)</th>
+                                <th style="border: 1px solid #666; padding: 3px; text-align: right; font-weight: bold;">Amount (NPR)</th>
+                                <th style="border: 1px solid #666; padding: 3px; text-align: left; font-weight: bold;">Signage</th>
+                                <th style="border: 1px solid #666; padding: 3px; text-align: left; font-weight: bold;">Fiscal Year</th>
+                                <th style="border: 1px solid #666; padding: 3px; text-align: right; font-weight: bold;">Discount (NPR)</th>
+                                <th style="border: 1px solid #666; padding: 3px; text-align: right; font-weight: bold;">Paid (NPR)</th>
+                                <th style="border: 1px solid #666; padding: 3px; text-align: right; font-weight: bold;">Unpaid (NPR)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${boards.map((board, index) => `
+                                <tr>
+                                    <td style="border: 1px solid #666; padding: 3px;">${index + 1}</td>
+                                    <td style="border: 1px solid #666; padding: 3px;">${board.shop_name || 'N/A'}</td>
+                                    <td style="border: 1px solid #666; padding: 3px;">${board.brand_name || 'N/A'}</td>
+                                    <td style="border: 1px solid #666; padding: 3px;">${board.address || 'N/A'}</td>
+                                    <td style="border: 1px solid #666; padding: 3px; text-align: right;">${board.breadth}</td>
+                                    <td style="border: 1px solid #666; padding: 3px; text-align: right;">${board.length}</td>
+                                    <td style="border: 1px solid #666; padding: 3px; text-align: right;">${board.quantity}</td>
+                                    <td style="border: 1px solid #666; padding: 3px; text-align: right;">${board.area}</td>
+                                    <td style="border: 1px solid #666; padding: 3px; text-align: right;">${board.rate}</td>
+                                    <td style="border: 1px solid #666; padding: 3px; text-align: right;">${board.amount}</td>
+                                    <td style="border: 1px solid #666; padding: 3px;">${board.board_type_name || 'N/A'}</td>
+                                    <td style="border: 1px solid #666; padding: 3px;">${board.fiscal_year || 'N/A'}</td>
+                                    <td style="border: 1px solid #666; padding: 3px; text-align: right;">${board.discount}</td>
+                                    <td style="border: 1px solid #666; padding: 3px; text-align: right;">${board.paid_amount}</td>
+                                    <td style="border: 1px solid #666; padding: 3px; text-align: right;">${board.remaining_amount}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Summary -->
+                <div style="margin: 8px 0;">
+                    <h3 style="font-size: 11pt; font-weight: bold; margin: 0 0 5px 0; color: #1a5276;">Summary</h3>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; border: 1px solid #666; border-radius: 4px; padding: 5px; background-color: #f9fafb; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                        <div style="font-size: 8pt; padding: 3px;">
+                            <strong>Total Boards:</strong> ${summary.total_boards}
+                        </div>
+                        <div style="font-size: 8pt; padding: 3px;">
+                            <strong>Total Charges:</strong> NPR ${summary.total_charges.toFixed(2)}
+                        </div>
+                        <div style="font-size: 8pt; padding: 3px;">
+                            <strong>Total Payments:</strong> NPR ${summary.total_payments.toFixed(2)}
+                        </div>
+                        <div style="font-size: 8pt; padding: 3px;">
+                            <strong>Total Discounts:</strong> NPR ${summary.total_discounts.toFixed(2)}
+                        </div>
+                        <div style="font-size: 8pt; padding: 3px;">
+                            <strong>VAT (${vatPercentage}%):</strong> NPR ${summary.vat_amount.toFixed(2)}
+                        </div>
+                        <div style="font-size: 8pt; padding: 3px;">
+                            <strong>Grand Total:</strong> NPR ${summary.grand_total.toFixed(2)}
+                        </div>
+                        <div style="font-size: 8pt; padding: 3px; grid-column: 1 / -1; font-weight: bold; text-align: center; background-color: #e6f3fa; border-radius: 2px;">
+                            <strong>Current Balance:</strong> NPR ${summary.balance.toFixed(2)}
+                        </div>
+                    </div>
+                </div>
+                <!-- Generated By and Footer -->
+                <div style="margin-top: 8px; font-size: 8pt; color: #555;">
+                    <p style="margin: 0; font-style: italic;">Generated by: ${userDisplayName}</p>
+                    <p style="margin: 2px 0; text-align: center;">Contact: ${company.email} | ${company.phone}</p>
+                </div>
+            </div>
+        `;
+        statementContent.innerHTML = statementHtml;
+    }
+
+    // Render application letter
+    function renderApplicationLetter(data) {
+        const client = data.client;
+        const company = data.company || {
+            name: 'SignHub Pvt Ltd',
+            address: 'Gausala, Kathmandu, Nepal',
+            email: 'info@signhub.com',
+            phone: '+977-1-1234567',
+            vat_id: '123456',
+            logo_url: ''
+        };
+        const summary = data.summary;
+        const fiscalYear = fiscalYearSelect.options[fiscalYearSelect.selectedIndex].text.replace('/', '0');
+        const userDisplayName = getUserDisplayName();
+        const previousDues = includePreviousDues.checked ? data.boards
+            .filter(board => board.fiscal_year !== fiscalYearSelect.options[fiscalYearSelect.selectedIndex].text)
+            .reduce((sum, board) => sum + parseFloat(board.remaining_amount), 0)
+            .toFixed(2) : '0.00';
+        const vatPercentage = summary.vat_amount > 0 ? (summary.vat_amount / summary.total_charges * 100).toFixed(2) : '0.00';
+
+        let letterHtml = `
+            <div style="font-family: 'Helvetica', sans-serif; font-size: 10pt; width: 100%; max-width: 800px; margin: 0 auto; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <!-- Header -->
+                <div style="text-align: center; margin-bottom: 12px;">
+                    ${company.logo_url ? `<img src="${company.logo_url}" alt="Company Logo" style="width: 80px; height: auto; margin-bottom: 5px;">` : ''}
+                    <h1 style="font-size: 14pt; font-weight: bold; margin: 0; line-height: 1.2; color: #1a5276;">${company.name}</h1>
+                    <p style="font-size: 8pt; margin: 0; line-height: 1.2; color: #333;">${company.address}</p>
+                    <p style="font-size: 8pt; margin: 0; line-height: 1.2; color: #333;">${company.email} | ${company.phone}</p>
+                    ${company.vat_id ? `<p style="font-size: 8pt; margin: 0; line-height: 1.2; color: #333;">VAT ID: ${company.vat_id}</p>` : ''}
+                </div>
+                <!-- Date -->
+                <div style="text-align: right; margin-bottom: 12px;">
+                    <p style="font-size: 8pt; margin: 0; color: #333;">Date: ${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                </div>
+                <div style="margin-bottom: 12px;">
+                    <p style="font-size: 8pt; margin: 6px 0; color: #333;">To,</p>
+                    <p style="font-size: 8pt; margin: 6px 0; color: #333;">The Managing Director</p>
+                    <p style="font-size: 8pt; margin: 6px 0; color: #333;">${client.name}</p>
+                    <p style="font-size: 8pt; margin: 6px 0; color: #333;">${client.address}</p>
+                </div>
+                <div style="margin-bottom: 12px; text-align: center;">
+                    <p style="font-size: 8pt; margin: 6px 0; font-weight: bold; color: #1a5276;">Subject: Notice of Advertisement Tax Liability</p>
+                </div>
+                <!-- Body -->
+                <div style="margin-bottom: 12px; font-size: 8pt; color: #333; line-height: 1.5;">
+                    <p style="margin: 6px 0;">Dear Sir/Madam,</p>
+                    <p style="margin: 6px 0;">We are writing to formally notify you, as per our contractual agreements with various Metropolitan Cities, Sub-Metropolitan Cities, Municipalities, and Rural Municipalities, that our organization is the authorized tax collection partner for advertising Signages installed on both public and private properties.</p>
+                    <p style="margin: 6px 0;">This encompasses all forms of advertising (BTL), including but not limited to hoarding boards, 2D board, 3D board, flex boards, glow-sign boards, wall paintings, shutter paintings, and other similar advertising displays.</p>
+                    <p style="margin: 6px 0;">Our records indicate that your company has installed various Advertising Signages across multiple locations within our jurisdiction. We kindly request you to settle the below mentioned advertising tax amount at your earliest convenience.</p>
+                    <p style="margin: 6px 0;">Detailed information regarding the locations, Quantity, amount, fiscal years and types of the installed Signages, along with the list of contracted Areas and supporting documents, are enclosed with this letter for your reference.</p>
+                    <ul style="margin: 6px 0; padding-left: 20px;">
+                        <li><strong>Fiscal Year:</strong> ${fiscalYear}</li>
+                        <li><strong>Company Name:</strong> ${client.name}</li>
+                        <li><strong>Amount To be Paid ${summary.vat_amount > 0 ? '(Including VAT)' : ''}:</strong> NPR ${summary.grand_total.toFixed(2)}</li>
+                        <li><strong>Previous Fiscal Years Due (Amount):</strong> NPR ${previousDues}</li>
+                        ${summary.vat_amount > 0 ? `<li><strong>VAT (${vatPercentage}%):</strong> NPR ${summary.vat_amount.toFixed(2)}</li>` : ''}
+                    </ul>
+                    <p style="margin: 6px 0;">Should you have any queries or require further clarification, please do not hesitate to contact us. We appreciate your prompt attention to this matter.</p>
+                </div>
+                <!-- Signature -->
+                <div style="margin-top: 12px; font-size: 8pt; color: #333; text-align: right;">
+                    <p style="margin: 6px 0;">Sincerely,</p>
+                    <p style="margin: 6px 0; font-weight: bold;">${userDisplayName}</p>
+                    <p style="margin: 6px 0;">(Head – Tax Department)</p>
+                    <p style="margin: 6px 0;">Mob: 9802325565</p>
+                </div>
+                <!-- Footer -->
+                <div style="margin-top: 12px; font-size: 8pt; color: #555; text-align: center;">
+                    <p style="margin: 6px 0;">${company.name}, ${company.address}</p>
+                    <p style="margin: 6px 0;">Contact: ${company.email} | ${company.phone}</p>
+                </div>
+            </div>
+        `;
+        applicationContent.innerHTML = letterHtml;
+    }
+
+    // Download statement as PDF
+    function downloadStatement() {
+        if (!statementData) {
+            Swal.fire({ icon: 'error', title: 'No Statement', text: 'Please generate a statement first', timer: 2000, timerProgressBar: true, showConfirmButton: false });
+            return;
+        }
+
+        console.log('Starting PDF generation for statement:', statementData);
+
+        const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+        const margin = 10;
+        let y = margin;
+        const userDisplayName = getUserDisplayName();
+        const pageWidth = doc.internal.pageSize.width;
+        const company = statementData.company || {
+            name: 'SignHub Pvt Ltd',
+            address: 'Gausala, Kathmandu, Nepal',
+            email: 'info@signhub.com',
+            phone: '+977-1-1234567',
+            vat_id: '123456',
+            logo_url: ''
+        };
+        const vatPercentage = statementData.summary.vat_amount > 0 ? (statementData.summary.vat_amount / statementData.summary.total_charges * 100).toFixed(2) : '0.00';
+
+        // Header
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(26, 82, 118);
+        doc.text(company.name, pageWidth / 2, y, { align: 'center' });
+        y += 5;
+        if (company.logo_url) {
+            try {
+                doc.addImage(company.logo_url, 'PNG', pageWidth / 2 - 20, y - 5, 40, 20);
+                y += 20;
+            } catch (error) {
+                console.error('Error adding logo to PDF:', error);
+            }
+        }
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(51, 51, 51);
+        doc.text(company.address, pageWidth / 2, y, { align: 'center' });
+        y += 4;
+        doc.text(`${company.email} | ${company.phone}`, pageWidth / 2, y, { align: 'center' });
+        if (company.vat_id) {
+            y += 4;
+            doc.text(`VAT ID: ${company.vat_id}`, pageWidth / 2, y, { align: 'center' });
+        }
+        y += 5;
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(26, 82, 118);
+        doc.text('Statement of Account', pageWidth / 2, y, { align: 'center' });
+        y += 7;
+
+        // Slogan
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'italic');
+        doc.setTextColor(85, 85, 85);
+        doc.text('Empowering Your Brand with Precision and Clarity', pageWidth / 2, y, { align: 'center' });
+        doc.setTextColor(51, 51, 51);
+        y += 6;
+
+        // Horizontal Line
+        doc.setDrawColor(102, 102, 102);
+        doc.line(margin, y, pageWidth - margin, y);
+        y += 4;
+
+        // Client and Date Info
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(51, 51, 51);
+        const clientInfo = [
+            `Client: ${statementData.client.name || 'N/A'}`,
+            `Email: ${statementData.client.email || 'N/A'}`,
+            `Address: ${statementData.client.address || 'N/A'}`,
+            `VAT ID: ${statementData.client.vat_id || 'N/A'}`
+        ];
+        const dateInfo = [
+            `Date: ${new Date().toISOString().split('T')[0]}`,
+            `Fiscal Year: ${fiscalYearSelect.options[fiscalYearSelect.selectedIndex].text}`,
+            `Month: ${monthSelect.value ? monthSelect.options[monthSelect.selectedIndex].text : 'All Months'}`
+        ];
+        const maxLines = Math.max(clientInfo.length, dateInfo.length);
+        for (let i = 0; i < maxLines; i++) {
+            if (clientInfo[i]) {
+                doc.text(clientInfo[i], margin, y);
+            }
+            if (i < 2 && clientInfo[i + 2]) {
+                doc.text(clientInfo[i + 2], margin + 50, y);
+            }
+            if (dateInfo[i]) {
+                doc.text(dateInfo[i], pageWidth - margin, y, { align: 'right' });
+            }
+            y += 4;
+        }
+        y += 5;
+
+        // Board Details
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(26, 82, 118);
+        doc.text('Board Details', margin, y);
+        y += 5;
+
+        const headers = ['S.N.', 'Shop Name', 'Brand', 'Address', 'H (ft)', 'W (ft)', 'Qty', 'T.Sq. (sqft)', 'Rate (NPR)', 'Amount (NPR)', 'Signage', 'Fiscal Year', 'Discount (NPR)', 'Paid (NPR)', 'Unpaid (NPR)'];
+        const data = statementData.boards.map((board, index) => [
+            String(index + 1),
+            String(board.shop_name || 'N/A'),
+            String(board.brand_name || 'N/A'),
+            String(board.address || 'N/A'),
+            String(board.breadth),
+            String(board.length),
+            String(board.quantity),
+            String(board.area),
+            String(board.rate),
+            String(board.amount),
+            String(board.board_type_name || 'N/A'),
+            String(board.fiscal_year || 'N/A'),
+            String(board.discount),
+            String(board.paid_amount),
+            String(board.remaining_amount)
+        ]);
+
+        const totalTableWidth = 190;
+        doc.autoTable({
+            startY: y,
+            head: [headers],
+            body: data,
+            theme: 'grid',
+            headStyles: { fillColor: [230, 243, 250], textColor: [0, 0, 0], fontSize: 7, fontStyle: 'bold' },
+            bodyStyles: { fontSize: 7 },
+            margin: { left: margin, right: margin },
+            columnStyles: {
+                0: { cellWidth: 6 },
+                1: { cellWidth: 14 },
+                2: { cellWidth: 14 },
+                3: { cellWidth: 18 },
+                4: { cellWidth: 6, halign: 'right' },
+                5: { cellWidth: 6, halign: 'right' },
+                6: { cellWidth: 6, halign: 'right' },
+                7: { cellWidth: 8, halign: 'right' },
+                8: { cellWidth: 8, halign: 'right' },
+                9: { cellWidth: 10, halign: 'right' },
+                10: { cellWidth: 12 },
+                11: { cellWidth: 12 },
+                12: { cellWidth: 8, halign: 'right' },
+                13: { cellWidth: 8, halign: 'right' },
+                14: { cellWidth: 10, halign: 'right' }
+            },
+            didDrawPage: function (data) {
+                y = data.table.finalY + 5;
+            }
+        });
+
+        y = doc.lastAutoTable.finalY + 5;
+
+        // Summary
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(26, 82, 118);
+        doc.text('Summary', margin, y);
+        y += 5;
+
+        const summaryItems = [
+            { label: 'Total Boards:', value: String(statementData.summary.total_boards) },
+            { label: 'Total Charges:', value: `NPR ${statementData.summary.total_charges.toFixed(2)}` },
+            { label: 'Total Payments:', value: `NPR ${statementData.summary.total_payments.toFixed(2)}` },
+            { label: 'Total Discounts:', value: `NPR ${statementData.summary.total_discounts.toFixed(2)}` },
+            { label: `VAT (${vatPercentage}%):`, value: `NPR ${statementData.summary.vat_amount.toFixed(2)}` },
+            { label: 'Grand Total:', value: `NPR ${statementData.summary.grand_total.toFixed(2)}` },
+            { label: 'Current Balance:', value: `NPR ${statementData.summary.balance.toFixed(2)}` }
+        ];
+
+        const summaryWidth = 190;
+        const summaryHeight = summaryItems.length <= 6 ? 24 : 30;
+        doc.setFillColor(249, 250, 251);
+        doc.setDrawColor(102, 102, 102);
+        doc.roundedRect(margin, y, summaryWidth, summaryHeight, 2, 2, 'FD');
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(51, 51, 51);
+
+        const colWidth = summaryWidth / 3;
+        let rowY = y + 4;
+        for (let i = 0; i < summaryItems.length - 1; i++) {
+            const col = i % 3;
+            if (col === 0 && i > 0) rowY += 4;
+            const x = margin + 5 + col * colWidth;
+            doc.text(summaryItems[i].label, x, rowY);
+            doc.text(summaryItems[i].value, x + colWidth - 5, rowY, { align: 'right' });
+        }
+
+        rowY += 6;
+        doc.setFillColor(230, 243, 250);
+        doc.roundedRect(margin, rowY - 2, summaryWidth, 6, 1, 1, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.text(summaryItems[6].label, margin + 5, rowY);
+        doc.text(summaryItems[6].value, margin + summaryWidth - 5, rowY, { align: 'right' });
+        y = rowY + 6;
+
+        // Footer
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'italic');
+        doc.setTextColor(85, 85, 85);
+        doc.text(`Generated by: ${userDisplayName}`, margin, y + 2);
+        doc.text(`Contact: ${company.email} | ${company.phone}`, pageWidth / 2, y + 6, { align: 'center' });
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Page ${doc.internal.getNumberOfPages()}`, pageWidth - margin, doc.internal.pageSize.height - 10, { align: 'right' });
+
+        doc.save(`statement_${currentClientId}_${fiscalYearSelect.options[fiscalYearSelect.selectedIndex].text}.pdf`);
+        Swal.fire({ icon: 'success', title: 'Downloaded', text: 'Statement downloaded successfully', timer: 1500, timerProgressBar: true, showConfirmButton: false });
+    }
+
+    // Download application letter as PDF
+    function downloadApplicationLetter() {
+        if (!statementData) {
+            Swal.fire({ icon: 'error', title: 'No Data', text: 'Please generate an application letter first', timer: 2000, timerProgressBar: true, showConfirmButton: false });
+            return;
+        }
+
+        console.log('Starting PDF generation for application letter:', statementData);
+
+        const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+        const margin = 20;
+        let y = margin;
+        const pageWidth = doc.internal.pageSize.width;
+        const userDisplayName = getUserDisplayName();
+        const fiscalYear = fiscalYearSelect.options[fiscalYearSelect.selectedIndex].text.replace('/', '0');
+        const company = statementData.company || {
+            name: 'SignHub Pvt Ltd',
+            address: 'Gausala, Kathmandu, Nepal',
+            email: 'info@signhub.com',
+            phone: '+977-1-1234567',
+            vat_id: '123456',
+            logo_url: ''
+        };
+        const previousDues = includePreviousDues.checked ? statementData.boards
+            .filter(board => board.fiscal_year !== fiscalYearSelect.options[fiscalYearSelect.selectedIndex].text)
+            .reduce((sum, board) => sum + parseFloat(board.remaining_amount), 0)
+            .toFixed(2) : '0.00';
+        const vatPercentage = statementData.summary.vat_amount > 0 ? (statementData.summary.vat_amount / statementData.summary.total_charges * 100).toFixed(2) : '0.00';
+
+        // Header
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(26, 82, 118);
+        doc.text(company.name, pageWidth / 2, y, { align: 'center' });
+        y += 6;
+        if (company.logo_url) {
+            try {
+                doc.addImage(company.logo_url, 'PNG', pageWidth / 2 - 20, y - 5, 40, 20);
+                y += 20;
+            } catch (error) {
+                console.error('Error adding logo to PDF:', error);
+            }
+        }
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(51, 51, 51);
+        doc.text(company.address, pageWidth / 2, y, { align: 'center' });
+        y += 4;
+        doc.text(`${company.email} | ${company.phone}`, pageWidth / 2, y, { align: 'center' });
+        if (company.vat_id) {
+            y += 4;
+            doc.text(`VAT ID: ${company.vat_id}`, pageWidth / 2, y, { align: 'center' });
+        }
+        y += 12;
+
+        // Date
+        doc.setFontSize(10);
+        doc.text(`Date: ${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}`, pageWidth - margin, y, { align: 'right' });
+        y += 10;
+
+        // Recipient
+        doc.setFontSize(10);
+        doc.setTextColor(51, 51, 51);
+        doc.text('To,', margin, y);
+        y += 6;
+        doc.text('The Managing Director', margin, y);
+        y += 6;
+        doc.text(statementData.client.name || 'N/A', margin, y);
+        y += 6;
+        doc.text(statementData.client.address || 'N/A', margin, y);
+        y += 10;
+
+        // Subject
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(26, 82, 118);
+        doc.text('Subject: Notice of Advertisement Tax Liability', pageWidth / 2, y, { align: 'center' });
+        y += 10;
+
+        // Body
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(51, 51, 51);
+        const bodyText = [
+            'Dear Sir/Madam,',
+            'We are writing to formally notify you, as per our contractual agreements with various Metropolitan Cities, Sub-Metropolitan Cities, Municipalities, and Rural Municipalities, that our organization is the authorized tax collection partner for advertising Signages installed on both public and private properties.',
+            'This encompasses all forms of advertising (BTL), including but not limited to hoarding boards, 2D board, 3D board, flex boards, glow-sign boards, wall paintings, shutter paintings, and other similar advertising displays.',
+            'Our records indicate that your company has installed various Advertising Signages across multiple locations within our jurisdiction. We kindly request you to settle the below mentioned advertising tax amount at your earliest convenience.',
+            'Detailed information regarding the locations, Quantity, amount, fiscal years and types of the installed Signages, along with the list of contracted Areas and supporting documents, are enclosed with this letter for your reference.'
+        ];
+        bodyText.forEach(line => {
+            const splitText = doc.splitTextToSize(line, pageWidth - 2 * margin);
+            splitText.forEach(text => {
+                doc.text(text, margin, y);
+                y += 6;
+            });
+            y += 2;
+        });
+
+        // Details List
+        const details = [
+            `Fiscal Year: ${fiscalYear}`,
+            `Company Name: ${statementData.client.name || 'N/A'}`,
+            `Amount To be Paid ${statementData.summary.vat_amount > 0 ? '(Including VAT)' : ''}: NPR ${statementData.summary.grand_total.toFixed(2)}`,
+            `Previous Fiscal Years Due (Amount): NPR ${previousDues}`
+        ];
+        if (statementData.summary.vat_amount > 0) {
+            details.push(`VAT (${vatPercentage}%): NPR ${statementData.summary.vat_amount.toFixed(2)}`);
+        }
+        doc.setFontSize(10);
+        details.forEach(line => {
+            const splitText = doc.splitTextToSize(line, pageWidth - 2 * margin);
+            splitText.forEach(text => {
+                doc.text(`• ${text}`, margin + 5, y);
+                y += 6;
+            });
+        });
+        y += 2;
+
+        // Closing
+        const closingText = [
+            'Should you have any queries or require further clarification, please do not hesitate to contact us. We appreciate your prompt attention to this matter.'
+        ];
+        closingText.forEach(line => {
+            const splitText = doc.splitTextToSize(line, pageWidth - 2 * margin);
+            splitText.forEach(text => {
+                doc.text(text, margin, y);
+                y += 6;
+            });
+            y += 2;
+        });
+
+        // Signature
+        doc.setFontSize(10);
+        doc.text('Sincerely,', pageWidth - margin, y, { align: 'right' });
+        y += 8;
+        doc.setFont('helvetica', 'bold');
+        doc.text(userDisplayName, pageWidth - margin, y, { align: 'right' });
+        y += 6;
+        doc.setFont('helvetica', 'normal');
+        doc.text('(Head – Tax Department)', pageWidth - margin, y, { align: 'right' });
+        y += 6;
+        doc.text('Mob: 9802325565', pageWidth - margin, y, { align: 'right' });
+        y += 12;
+
+        // Footer
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(85, 85, 85);
+        doc.text(`${company.name}, ${company.address}`, pageWidth / 2, y, { align: 'center' });
+        y += 4;
+        doc.text(`Contact: ${company.email} | ${company.phone}`, pageWidth / 2, y, { align: 'center' });
+        doc.text(`Page ${doc.internal.getNumberOfPages()}`, pageWidth - margin, doc.internal.pageSize.height - 10, { align: 'right' });
+
+        doc.save(`application_letter_${currentClientId}_${fiscalYear}.pdf`);
+        Swal.fire({ icon: 'success', title: 'Downloaded', text: 'Application letter downloaded successfully', timer: 1500, timerProgressBar: true, showConfirmButton: false });
+    }
+
+    // Print statement
+    function printStatement() {
+        if (!statementData) {
+            Swal.fire({ icon: 'error', title: 'No Statement', text: 'Please generate a statement first', timer: 2000, timerProgressBar: true, showConfirmButton: false });
+            return;
+        }
+        const company = statementData.company || {
+            name: 'SignHub Pvt Ltd',
+            address: 'Gausala, Kathmandu, Nepal',
+            email: 'info@signhub.com',
+            phone: '+977-1-1234567',
+            vat_id: '123456',
+            logo_url: ''
+        };
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>Print Statement</title>
+                    <style>
+                        body { font-family: 'Helvetica', sans-serif; margin: 20px; }
+                        .box-shadow { box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
+                        table { width: 100%; border-collapse: collapse; }
+                        th, td { border: 1px solid #666; padding: 3px; }
+                        thead { background-color: #e6f3fa; }
+                        h1, h2, h3 { color: #1a5276; }
+                        hr { border: none; border-top: 1px solid #666; }
+                        .summary-box { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; border: 1px solid #666; border-radius: 4px; padding: 5px; background-color: #f9fafb; }
+                        .current-balance { grid-column: 1 / -1; text-align: center; background-color: #e6f3fa; border-radius: 2px; }
+                        .header { text-align: center; }
+                        .header img { width: 80px; height: auto; margin-bottom: 5px; }
+                    </style>
+                </head>
+                <body>
+                    <div style="font-size: 10pt; width: 100%; max-width: 1000px; margin: 0 auto; padding: 10px;" class="box-shadow">
+                        ${statementContent.innerHTML}
+                    </div>
+                </body>
+            </html>
+        `);
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.print();
+    }
+
+    // Print application letter
+    function printApplicationLetter() {
+        if (!statementData) {
+            Swal.fire({ icon: 'error', title: 'No Data', text: 'Please generate an application letter first', timer: 2000, timerProgressBar: true, showConfirmButton: false });
+            return;
+        }
+        const company = statementData.company || {
+            name: 'SignHub Pvt Ltd',
+            address: 'Gausala, Kathmandu, Nepal',
+            email: 'info@signhub.com',
+            phone: '+977-1-1234567',
+            vat_id: '123456',
+            logo_url: ''
+        };
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>Print Application Letter</title>
+                    <style>
+                        body { font-family: 'Helvetica', sans-serif; margin: 20px; }
+                        .box-shadow { box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
+                        h1, h2 { color: #1a5276; }
+                        p, ul { font-size: 10pt; line-height: 1.4; }
+                        ul { padding-left: 20px; }
+                        .header { text-align: center; }
+                        .header img { width: 80px; height: auto; margin-bottom: 5px; }
+                    </style>
+                </head>
+                <body>
+                    <div style="font-size: 10pt; width: 100%; max-width: 800px; margin: 0 auto; padding: 20px;" class="box-shadow">
+                        ${applicationContent.innerHTML}
+                    </div>
+                </body>
+            </html>
+        `);
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.print();
+    }
+
+    // Clear filters
+    function clearFilters() {
+        clientIdInput.value = '';
+        clientNameInput.value = '';
+        currentClientId = null;
+        fiscalYearSelect.innerHTML = '<option value="">Select Fiscal Year</option>';
+        fiscalYearSelect.disabled = true;
+        monthSelect.innerHTML = '<option value="">Select Month</option>';
+        monthSelect.disabled = true;
+        includePreviousDues.checked = false;
+        includeVat.checked = true;
+        statementContainer.classList.add('hidden');
+        applicationContainer.classList.add('hidden');
+        currentFiscalYearId = null;
+        currentMonth = null;
+        statementData = null;
+        clientNameInput.focus();
+    }
+
+    // Event listeners
+    clientNameInput.addEventListener('input', () => {
+        const searchTerm = clientNameInput.value.trim();
+        if (searchTerm) {
+            populateClientDropdown(searchTerm);
+        } else {
+            clientDropdown.classList.add('hidden');
+            clientIdInput.value = '';
+            currentClientId = null;
+            fiscalYearSelect.innerHTML = '<option value="">Select Fiscal Year</option>';
+            fiscalYearSelect.disabled = true;
+            monthSelect.innerHTML = '<option value="">Select Month</option>';
+            monthSelect.disabled = true;
+        }
+    });
+
+    clientNameInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            const firstClient = clientList.querySelector('li');
+            if (firstClient) {
+                currentClientId = firstClient.dataset.clientId;
+                clientNameInput.value = firstClient.textContent;
+                clientIdInput.value = firstClient.dataset.clientId;
+                clientDropdown.classList.add('hidden');
+                fetchFiscalYears(firstClient.dataset.registrationDate);
+            }
+        }
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!clientDropdown.contains(e.target) && e.target !== clientNameInput) {
+            clientDropdown.classList.add('hidden');
+        }
+    });
+
+    fiscalYearSelect.addEventListener('change', () => {
+        currentFiscalYearId = fiscalYearSelect.value;
+        const selectedOption = fiscalYearSelect.options[fiscalYearSelect.selectedIndex];
+        populateMonths(selectedOption.dataset.createdAt, selectedOption.dataset.isActive === 'true');
+    });
+
+    monthSelect.addEventListener('change', () => {
+        currentMonth = monthSelect.value;
+    });
+
+    generateStatementBtn.addEventListener('click', () => generateReport('statement'));
+    generateApplicationBtn.addEventListener('click', () => generateReport('application'));
+    clearBtn.addEventListener('click', clearFilters);
+    downloadStatementBtn.addEventListener('click', downloadStatement);
+    printStatementBtn.addEventListener('click', printStatement);
+    downloadApplicationBtn.addEventListener('click', downloadApplicationLetter);
+    printApplicationBtn.addEventListener('click', printApplicationLetter);
+
+    // Initialize
+    initializeFilters();
+});
+</script>
+<style>
+.box-shadow {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+</style>
+{% endblock %}

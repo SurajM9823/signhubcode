@@ -1,0 +1,410 @@
+{% extends 'base_authenticated.html' %}
+{% load static %}
+
+{% block title %}Settings{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+    <!-- Settings Header -->
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Settings</h1>
+        <div>
+            <span class="text-sm text-gray-500 font-medium">Last updated: Today at {% now "g:i A" %}</span>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="bg-white rounded-xl shadow-lg border border-gray-100">
+        <div class="border-b border-gray-200">
+            <nav class="flex -mb-px">
+                <button class="tab-btn w-1/3 py-4 px-1 text-center border-b-2 font-medium text-sm" data-tab="vat-settings" style="border-color: #10b981; color: #10b981;">
+                    Tax/VAT Settings
+                </button>
+                <button class="tab-btn w-1/3 py-4 px-1 text-center border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300" data-tab="company-settings">
+                    Company Settings
+                </button>
+                <button class="tab-btn w-1/3 py-4 px-1 text-center border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300" data-tab="email-settings">
+                    Email Credentials
+                </button>
+            </nav>
+        </div>
+
+        <!-- VAT Settings Tab -->
+        <div id="vat-settings" class="tab-content p-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-6">Tax/VAT Settings</h2>
+            <div class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="fiscal_year" class="block text-sm font-medium text-gray-700 mb-1">Fiscal Year</label>
+                        <select id="fiscal_year" class="block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm">
+                            <option value="">Select Fiscal Year</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="vat_rate" class="block text-sm font-medium text-gray-700 mb-1">VAT Rate (%)</label>
+                        <input type="number" id="vat_rate" step="0.01" min="0" value="13.00" class="block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm">
+                    </div>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="is_active_vat" class="h-5 w-5 text-teal-600 focus:ring-2 focus:ring-teal-500 border-gray-300 rounded">
+                        <label for="is_active_vat" class="ml-2 block text-sm font-medium text-gray-900">Active VAT Rate</label>
+                    </div>
+                </div>
+                <div class="flex space-x-4">
+                    <button id="save-vat-btn" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition duration-300 ease-in-out flex items-center">
+                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <span>Save VAT Rate</span>
+                    </button>
+                </div>
+            </div>
+            <div class="mt-6 overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Fiscal Year</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">VAT Rate (%)</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Active</th>
+                        </tr>
+                    </thead>
+                    <tbody id="vat-table" class="bg-white divide-y divide-gray-200"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Company Settings Tab -->
+        <div id="company-settings" class="tab-content p-6 hidden">
+            <h2 class="text-xl font-semibold text-gray-800 mb-6">Company Settings</h2>
+            <div class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="company_name" class="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
+                        <input type="text" id="company_name" class="block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm">
+                    </div>
+                    <div>
+                        <label for="company_email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input type="email" id="company_email" class="block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm">
+                    </div>
+                    <div>
+                        <label for="company_phone" class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                        <input type="text" id="company_phone" class="block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm">
+                    </div>
+                    <div>
+                        <label for="company_vat_id" class="block text-sm font-medium text-gray-700 mb-1">VAT ID</label>
+                        <input type="text" id="company_vat_id" class="block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm">
+                    </div>
+                    <div class="col-span-2">
+                        <label for="company_address" class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                        <textarea id="company_address" rows="4" class="block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm"></textarea>
+                    </div>
+                    <div class="col-span-2">
+                        <label for="company_logo" class="block text-sm font-medium text-gray-700 mb-1">Company Logo</label>
+                        <input type="file" id="company_logo" accept="image/*" class="block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm">
+                        <img id="logo-preview" class="mt-2 max-w-xs hidden" src="" alt="Logo Preview">
+                    </div>
+                </div>
+                <div class="flex space-x-4">
+                    <button id="save-company-btn" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition duration-300 ease-in-out flex items-center">
+                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <span>Save Company Settings</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Email Credentials Tab -->
+        <div id="email-settings" class="tab-content p-6 hidden">
+            <h2 class="text-xl font-semibold text-gray-800 mb-6">Email Credentials</h2>
+            <div class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="smtp_host" class="block text-sm font-medium text-gray-700 mb-1">SMTP Host</label>
+                        <input type="text" id="smtp_host" class="block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm">
+                    </div>
+                    <div>
+                        <label for="smtp_port" class="block text-sm font-medium text-gray-700 mb-1">SMTP Port</label>
+                        <input type="number" id="smtp_port" class="block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm">
+                    </div>
+                    <div>
+                        <label for="smtp_username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                        <input type="text" id="smtp_username" class="block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm">
+                    </div>
+                    <div>
+                        <label for="smtp_password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <input type="password" id="smtp_password" class="block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm">
+                    </div>
+                    <div>
+                        <label for="from_email" class="block text-sm font-medium text-gray-700 mb-1">From Email</label>
+                        <input type="email" id="from_email" class="block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm">
+                    </div>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="use_tls" class="h-5 w-5 text-teal-600 focus:ring-2 focus:ring-teal-500 border-gray-300 rounded">
+                        <label for="use_tls" class="ml-2 block text-sm font-medium text-gray-900">Use TLS</label>
+                    </div>
+                </div>
+                <div class="flex space-x-4">
+                    <button id="save-email-btn" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition duration-300 ease-in-out flex items-center">
+                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <span>Save Email Credentials</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Tab switching
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            tabButtons.forEach(btn => {
+                btn.classList.remove('text-teal-600', 'border-teal-600');
+                btn.classList.add('text-gray-500', 'border-transparent', 'hover:text-gray-700', 'hover:border-gray-300');
+            });
+            button.classList.remove('text-gray-500', 'border-transparent', 'hover:text-gray-700', 'hover:border-gray-300');
+            button.classList.add('text-teal-600', 'border-teal-600');
+
+            tabContents.forEach(content => content.classList.add('hidden'));
+            document.getElementById(button.dataset.tab).classList.remove('hidden');
+        });
+    });
+
+    // VAT Settings
+    const fiscalYearSelect = document.getElementById('fiscal_year');
+    const vatRateInput = document.getElementById('vat_rate');
+    const isActiveVatCheckbox = document.getElementById('is_active_vat');
+    const saveVatBtn = document.getElementById('save-vat-btn');
+    const vatTable = document.getElementById('vat-table');
+
+    async function loadFiscalYears() {
+        try {
+            const response = await fetch('{% url "get_fiscal_years" %}', {
+                headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+            });
+            const data = await response.json();
+            if (data.success) {
+                fiscalYearSelect.innerHTML = '<option value="">Select Fiscal Year</option>';
+                data.fiscal_years.forEach(year => {
+                    const option = document.createElement('option');
+                    option.value = year.id;
+                    option.textContent = year.name;
+                    if (year.is_active) option.selected = true;
+                    fiscalYearSelect.appendChild(option);
+                });
+            } else {
+                Swal.fire({ icon: 'error', title: 'Error', text: data.message || 'Failed to load fiscal years', timer: 2000 });
+            }
+        } catch (error) {
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to load fiscal years', timer: 2000 });
+        }
+    }
+
+    async function loadVatRates() {
+        try {
+            const response = await fetch('{% url "get_vat_rates" %}', {
+                headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+            });
+            const data = await response.json();
+            if (data.success) {
+                vatTable.innerHTML = '';
+                data.vat_rates.forEach(rate => {
+                    const row = document.createElement('tr');
+                    row.className = 'hover:bg-gray-50 transition duration-200';
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${rate.fiscal_year_name}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${rate.rate}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            ${rate.is_active ? '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Active</span>' : ''}
+                        </td>
+                    `;
+                    vatTable.appendChild(row);
+                });
+            } else {
+                Swal.fire({ icon: 'error', title: 'Error', text: data.message || 'Failed to load VAT rates', timer: 2000 });
+            }
+        } catch (error) {
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to load VAT rates', timer: 2000 });
+        }
+    }
+
+    saveVatBtn.addEventListener('click', async () => {
+        const fiscalYearId = fiscalYearSelect.value;
+        const rate = vatRateInput.value;
+        if (!fiscalYearId || !rate) {
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Please select a fiscal year and enter a VAT rate', timer: 2000 });
+            return;
+        }
+        try {
+            const response = await fetch('{% url "save_vat_rate" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    fiscal_year_id: fiscalYearId,
+                    rate,
+                    is_active: isActiveVatCheckbox.checked
+                })
+            });
+            const data = await response.json();
+            if (data.success) {
+                Swal.fire({ icon: 'success', title: 'Success', text: 'VAT rate saved successfully', timer: 2000 }).then(() => {
+                    loadVatRates();
+                });
+            } else {
+                Swal.fire({ icon: 'error', title: 'Error', text: data.message || 'Failed to save VAT rate', timer: 2000 });
+            }
+        } catch (error) {
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to save VAT rate', timer: 2000 });
+        }
+    });
+
+    // Company Settings
+    const companyNameInput = document.getElementById('company_name');
+    const companyEmailInput = document.getElementById('company_email');
+    const companyPhoneInput = document.getElementById('company_phone');
+    const companyVatIdInput = document.getElementById('company_vat_id');
+    const companyAddressInput = document.getElementById('company_address');
+    const companyLogoInput = document.getElementById('company_logo');
+    const logoPreview = document.getElementById('logo-preview');
+    const saveCompanyBtn = document.getElementById('save-company-btn');
+
+    async function loadCompanySettings() {
+        try {
+            const response = await fetch('{% url "get_company_settings" %}', {
+                headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+            });
+            const data = await response.json();
+            if (data.success && data.company) {
+                companyNameInput.value = data.company.name || '';
+                companyEmailInput.value = data.company.email || '';
+                companyPhoneInput.value = data.company.phone || '';
+                companyVatIdInput.value = data.company.vat_id || '';
+                companyAddressInput.value = data.company.address || '';
+                if (data.company.logo_url) {
+                    logoPreview.src = data.company.logo_url;
+                    logoPreview.classList.remove('hidden');
+                }
+            }
+        } catch (error) {
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to load company settings', timer: 2000 });
+        }
+    }
+
+    companyLogoInput.addEventListener('change', () => {
+        if (companyLogoInput.files && companyLogoInput.files[0]) {
+            logoPreview.src = URL.createObjectURL(companyLogoInput.files[0]);
+            logoPreview.classList.remove('hidden');
+        }
+    });
+
+    saveCompanyBtn.addEventListener('click', async () => {
+        const formData = new FormData();
+        formData.append('name', companyNameInput.value);
+        formData.append('email', companyEmailInput.value);
+        formData.append('phone', companyPhoneInput.value);
+        formData.append('vat_id', companyVatIdInput.value);
+        formData.append('address', companyAddressInput.value);
+        if (companyLogoInput.files[0]) {
+            formData.append('logo', companyLogoInput.files[0]);
+        }
+
+        try {
+            const response = await fetch('{% url "save_company_settings" %}', {
+                method: 'POST',
+                headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+                body: formData
+            });
+            const data = await response.json();
+            if (data.success) {
+                Swal.fire({ icon: 'success', title: 'Success', text: 'Company settings saved successfully', timer: 2000 }).then(() => {
+                    loadCompanySettings();
+                });
+            } else {
+                Swal.fire({ icon: 'error', title: 'Error', text: data.message || 'Failed to save company settings', timer: 2000 });
+            }
+        } catch (error) {
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to save company settings', timer: 2000 });
+        }
+    });
+
+    // Email Credentials
+    const smtpHostInput = document.getElementById('smtp_host');
+    const smtpPortInput = document.getElementById('smtp_port');
+    const smtpUsernameInput = document.getElementById('smtp_username');
+    const smtpPasswordInput = document.getElementById('smtp_password');
+    const fromEmailInput = document.getElementById('from_email');
+    const useTlsCheckbox = document.getElementById('use_tls');
+    const saveEmailBtn = document.getElementById('save-email-btn');
+
+    async function loadEmailCredentials() {
+        try {
+            const response = await fetch('{% url "get_email_credentials" %}', {
+                headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+            });
+            const data = await response.json();
+            if (data.success && data.credentials) {
+                smtpHostInput.value = data.credentials.smtp_host || '';
+                smtpPortInput.value = data.credentials.smtp_port || '';
+                smtpUsernameInput.value = data.credentials.username || '';
+                fromEmailInput.value = data.credentials.from_email || '';
+                useTlsCheckbox.checked = data.credentials.use_tls || false;
+            }
+        } catch (error) {
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to load email credentials', timer: 2000 });
+        }
+    }
+
+    saveEmailBtn.addEventListener('click', async () => {
+        const payload = {
+            smtp_host: smtpHostInput.value,
+            smtp_port: smtpPortInput.value,
+            username: smtpUsernameInput.value,
+            password: smtpPasswordInput.value,
+            from_email: fromEmailInput.value,
+            use_tls: useTlsCheckbox.checked
+        };
+        try {
+            const response = await fetch('{% url "save_email_credentials" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify(payload)
+            });
+            const data = await response.json();
+            if (data.success) {
+                Swal.fire({ icon: 'success', title: 'Success', text: 'Email credentials saved successfully', timer: 2000 });
+                smtpPasswordInput.value = '';
+            } else {
+                Swal.fire({ icon: 'error', title: 'Error', text: data.message || 'Failed to save email credentials', timer: 2000 });
+            }
+        } catch (error) {
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to save email credentials', timer: 2000 });
+        }
+    });
+
+    // Initialize
+    loadFiscalYears();
+    loadVatRates();
+    loadCompanySettings();
+    loadEmailCredentials();
+});
+</script>
+
+<style>
+.tab-btn.border-teal-600 {
+    border-color: #10b981 !important;
+}
+</style>
+{% endblock %}

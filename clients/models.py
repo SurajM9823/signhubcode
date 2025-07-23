@@ -107,10 +107,10 @@ class UserProfile(models.Model):
 
 class Client(models.Model):
     name = models.CharField(max_length=100)
-    email = models.EmailField(unique=True)
+    email = models.EmailField(blank=True)
     phone = models.CharField(max_length=15, blank=True)
     address = models.TextField(blank=True)
-    vat_id = models.CharField(max_length=20, unique=True, help_text="Client's Tax Identification Number")
+    vat_id = models.CharField(max_length=20, help_text="Client's Tax Identification Number")
     registration_date = models.DateField(default=timezone.now)
     notes = models.TextField(blank=True, help_text="Additional tax or client notes")
     fiscal_year = models.ForeignKey(FiscalYear, on_delete=models.CASCADE, related_name='clients', null=True, blank=True)

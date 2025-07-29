@@ -651,32 +651,32 @@ document.addEventListener('DOMContentLoaded', function() {
             const row = document.createElement('tr');
             row.className = 'hover:bg-gray-50 transition-colors';
             row.innerHTML = `
-                <td class="px-4 py-2 text-gray-600 border-b">${board.address}</td>
-                <td class="px-4 py-2 text-gray-600 border-b">${board.shop_name}</td>
-                <td class="px-4 py-2 text-gray-600 border-b">${board.brand_name}</td>
-                <td class="px-4 py-2 border-b">
-                    <span class="px-2 py-1 text-xs font-medium rounded-full ${getBoardTypeColor(board.board_type_name)}">${board.board_type_name}</span>
-                </td>
-                <td class="px-4 py-2 text-gray-600 border-b">${board.length} × ${board.breadth} ft</td>
-                <td class="px-4 py-2 text-gray-600 border-b">${board.area} sqft</td>
-                <td class="px-4 py-2 text-gray-600 border-b">${board.quantity}</td>
-                <td class="px-4 py-2 text-gray-600 border-b">NPR ${board.rate}</td>
-                <td class="px-4 py-2 text-gray-600 border-b">NPR ${board.discount}</td>
-                <td class="px-4 py-2 text-gray-900 font-semibold border-b">NPR ${board.total_amount}</td>
-                <td class="px-4 py-2 text-gray-600 border-b">NPR ${board.paid_amount}</td>
-                <td class="px-4 py-2 text-gray-600 border-b">${board.status}</td>
-                <td class="px-4 py-2 border-b">
-                    <button class="edit-board text-blue-600 hover:text-blue-800 mr-2" data-id="${board.id}">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="delete-board text-red-600 hover:text-red-800 mr-2" data-id="${board.id}">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                    <button class="apply-payment-discount text-teal-600 hover:text-teal-800" data-id="${board.id}">
-                        <i class="fas fa-dollar-sign"></i>
-                    </button>
-                </td>
-            `;
+            <td class="px-4 py-2 text-gray-600 border-b">${board.address}</td>
+            <td class="px-4 py-2 text-gray-600 border-b">${board.shop_name}</td>
+            <td class="px-4 py-2 text-gray-600 border-b">${board.brand_name}</td>
+            <td class="px-4 py-2 border-b">
+                <span class="px-2 py-1 text-xs font-medium rounded-full ${getBoardTypeColor(board.board_type_name)}">${board.board_type_name}</span>
+            </td>
+            <td class="px-4 py-2 text-gray-600 border-b">${parseFloat(board.length).toFixed(2)} × ${parseFloat(board.breadth).toFixed(2)} ft</td>
+            <td class="px-4 py-2 text-gray-600 border-b">${parseFloat(board.area).toFixed(2)} sqft</td>
+            <td class="px-4 py-2 text-gray-600 border-b">${board.quantity}</td>
+            <td class="px-4 py-2 text-gray-600 border-b">NPR ${parseFloat(board.rate).toFixed(2)}</td>
+            <td class="px-4 py-2 text-gray-600 border-b">NPR ${parseFloat(board.discount).toFixed(2)}</td>
+            <td class="px-4 py-2 text-gray-900 font-semibold border-b">NPR ${parseFloat(board.total_amount).toFixed(2)}</td>
+            <td class="px-4 py-2 text-gray-600 border-b">NPR ${parseFloat(board.paid_amount).toFixed(2)}</td>
+            <td class="px-4 py-2 text-gray-600 border-b">${board.status}</td>
+            <td class="px-4 py-2 border-b">
+                <button class="edit-board text-blue-600 hover:text-blue-800 mr-2" data-id="${board.id}">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="delete-board text-red-600 hover:text-red-800 mr-2" data-id="${board.id}">
+                    <i class="fas fa-trash"></i>
+                </button>
+                <button class="apply-payment-discount text-teal-600 hover:text-teal-800" data-id="${board.id}">
+                    <i class="fas fa-dollar-sign"></i>
+                </button>
+            </td>
+        `;
             boardTableBody.appendChild(row);
         });
 

@@ -11,14 +11,20 @@
             <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Client Management</h1>
             <p class="text-gray-600 text-sm mt-1">Manage advertisement boards and client details</p>
         </div>
-        <div class="flex items-center space-x-3">
-            <button id="add-board-type-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium transition-colors flex items-center тогда
-            space-x-2 text-sm">
+        <div class="flex items-center space-x-3 flex-wrap">
+            <button id="add-municipality-btn" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md font-medium transition-colors flex items-center space-x-2 text-sm">
+                <i class="fas fa-plus"></i>
+                <span>Add Municipality</span>
+            </button>
+            <button id="add-board-type-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium transition-colors flex items-center space-x-2 text-sm">
                 <i class="fas fa-plus"></i>
                 <span>Add Board Type</span>
             </button>
-            <button id="add-brand-btn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md font-medium transition-colors flex items-center space-x-icult
-            2 text-sm">
+            <button id="set-rate-btn" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-md font-medium transition-colors flex items-center space-x-2 text-sm">
+                <i class="fas fa-dollar-sign"></i>
+                <span>Set Board Type Rate</span>
+            </button>
+            <button id="add-brand-btn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md font-medium transition-colors flex items-center space-x-2 text-sm">
                 <i class="fas fa-plus"></i>
                 <span>Add Brand</span>
             </button>
@@ -26,65 +32,65 @@
     </div>
 
     <!-- Client Search -->
-    <!-- Client Search -->
-<div class="bg-white rounded-lg shadow-md p-6 mb-6 border border-gray-100">
-    <div class="flex flex-col sm:flex-row sm:space-x-4 gap-4">
-        <div class="flex-1">
-            <label for="client_id" class="block text-sm font-medium text-gray-700 mb-1">Client ID</label>
-            <input type="text" id="client_id" placeholder="Enter client ID" 
-                   class="block w-full px-3 py-2 border border-gray-200 rounded-md shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm">
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6 border border-gray-100">
+        <div class="flex flex-col sm:flex-row sm:space-x-4 gap-4">
+            <div class="flex-1">
+                <label for="client_id" class="block text-sm font-medium text-gray-700 mb-1">Client ID</label>
+                <input type="text" id="client_id" placeholder="Enter client ID" 
+                       class="block w-full px-3 py-2 border border-gray-200 rounded-md shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm">
+            </div>
+            <div class="flex-1 relative">
+                <label for="client_name" class="block text-sm font-medium text-gray-700 mb-1">Client Name</label>
+                <input type="text" id="client_name" placeholder="Enter client name (e.g., NISS)" 
+                       class="block w-full px-3 py-2 border border-gray-200 rounded-md shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm">
+                <div id="client-dropdown" class="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto hidden">
+                    <ul id="client-list" class="text-sm text-gray-700"></ul>
+                </div>
+            </div>
+            <button id="search-client-btn" class="bg-teal-600 hover:bg-teal-700 text-white font-medium py-2 px-4 rounded-md transition-colors flex items-center space-x-2 sm:mt-7">
+                <i class="fas fa-search"></i>
+                <span>Search</span>
+            </button>
         </div>
-        <div class="flex-1 relative">
-            <label for="client_name" class="block text-sm font-medium text-gray-700 mb-1">Client Name</label>
-            <input type="text" id="client_name" placeholder="Enter client name (e.g., NISS)" 
-                   class="block w-full px-3 py-2 border border-gray-200 rounded-md shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm">
-            <div id="client-dropdown" class="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto hidden">
-                <ul id="client-list" class="text-sm text-gray-700"></ul>
+        <div id="client-info" class="mt-4 p-4 bg-green-50 rounded-md border border-green-200 hidden">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-check-circle text-green-600"></i>
+                <span class="text-sm font-medium text-green-800">Client Found:</span>
+                <span id="client-name" class="text-sm font-semibold text-green-900"></span>
+            </div>
+            <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+                <div>
+                    <span class="font-medium text-gray-700">Total Boards: </span>
+                    <span id="total-boards" class="font-semibold text-teal-600">0</span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-700">Previous Dues: NPR </span>
+                    <span id="previous-dues" class="font-semibold text-red-600">0.00</span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-700">This Year: NPR </span>
+                    <span id="total-value" class="font-semibold text-green-600">0.00</span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-700">Total Dues: NPR </span>
+                    <span id="total-dues" class="font-semibold text-red-600">0.00</span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-700">Total Discount: NPR </span>
+                    <span id="total-discount" class="font-semibold text-purple-600">0.00</span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-700">Total Paid: NPR </span>
+                    <span id="total-paid" class="font-semibold text-green-600">0.00</span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-700">Total Remaining: NPR </span>
+                    <span id="total-remaining" class="font-semibold text-red-600">0.00</span>
+                </div>
             </div>
         </div>
-        <button id="search-client-btn" class="bg-teal-600 hover:bg-teal-700 text-white font-medium py-2 px-4 rounded-md transition-colors flex items-center space-x-2 sm:mt-7">
-            <i class="fas fa-search"></i>
-            <span>Search</span>
-        </button>
     </div>
-    <div id="client-info" class="mt-4 p-4 bg-green-50 rounded-md border border-green-200 hidden">
-        <div class="flex items-center space-x-2">
-            <i class="fas fa-check-circle text-green-600"></i>
-            <span class="text-sm font-medium text-green-800">Client Found:</span>
-            <span id="client-name" class="text-sm font-semibold text-green-900"></span>
-        </div>
-        <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
-            <div>
-                <span class="font-medium text-gray-700">Total Boards: </span>
-                <span id="total-boards" class="font-semibold text-teal-600">0</span>
-            </div>
-            <div>
-                <span class="font-medium text-gray-700">Previous Dues: NPR </span>
-                <span id="previous-dues" class="font-semibold text-red-600">0.00</span>
-            </div>
-            <div>
-                <span class="font-medium text-gray-700">This Year: NPR </span>
-                <span id="total-value" class="font-semibold text-green-600">0.00</span>
-            </div>
-            <div>
-                <span class="font-medium text-gray-700">Total Dues: NPR </span>
-                <span id="total-dues" class="font-semibold text-red-600">0.00</span>
-            </div>
-            <div>
-                <span class="font-medium text-gray-700">Total Discount: NPR </span>
-                <span id="total-discount" class="font-semibold text-purple-600">0.00</span>
-            </div>
-            <div>
-                <span class="font-medium text-gray-700">Total Paid: NPR </span>
-                <span id="total-paid" class="font-semibold text-green-600">0.00</span>
-            </div>
-            <div>
-                <span class="font-medium text-gray-700">Total Remaining: NPR </span>
-                <span id="total-remaining" class="font-semibold text-red-600">0.00</span>
-            </div>
-        </div>
-    </div>
-</div>
+
     <!-- Board Details Form -->
     <div id="board-form-container" class="bg-white rounded-lg shadow-md p-6 mb-6 border border-gray-100 hidden">
         <h2 id="board-form-title" class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
@@ -94,10 +100,14 @@
         <input type="hidden" id="board-id">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <!-- Address -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
-                <input type="text" id="address" placeholder="Enter full address" 
+            <div class="relative">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Address (Municipality)</label>
+                <input type="text" id="address" placeholder="Enter municipality name to search" 
                        class="w-full px-3 py-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm">
+                <div id="municipality-dropdown" class="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto hidden">
+                    <ul id="municipality-list" class="text-sm text-gray-700"></ul>
+                </div>
+                <input type="hidden" id="municipality-id">
             </div>
 
             <!-- Shop Name -->
@@ -147,8 +157,8 @@
             <!-- Rate -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Rate (NPR/sqft)</label>
-                <input type="number" id="rate" min="0" step="0.01" placeholder="0.00" 
-                       class="w-full px-3 py-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm">
+                <input type="number" id="rate" min="0" step="0.01" placeholder="0.00" readonly
+                       class="w-full px-3 py-2 border border-gray-200 rounded-md bg-gray-50 text-sm">
             </div>
 
             <!-- Discount -->
@@ -240,6 +250,48 @@
         </div>
     </div>
 
+    <!-- Add Municipality Modal -->
+    <div id="municipality-modal" class="fixed inset-0 bg-black bg-opacity-50 modal-backdrop hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="municipality-modal-title" class="text-lg font-semibold text-gray-900">Add Municipality</h3>
+                <button id="close-municipality-modal" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Municipality Name</label>
+                    <input type="text" id="new-municipality" placeholder="e.g., Kathmandu" 
+                           class="w-full px-3 py-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm">
+                    <input type="hidden" id="municipality-id">
+                </div>
+                <div class="flex space-x-3 pt-4">
+                    <button id="save-municipality" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-md font-medium transition-colors">
+                        Save Municipality
+                    </button>
+                    <button id="cancel-municipality" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 py-2 px-4 rounded-md font-medium transition-colors">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+            <div class="mt-6">
+                <h4 class="text-sm font-medium text-gray-700 mb-2">Existing Municipalities</h4>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-2 text-left font-medium text-gray-600">Name</th>
+                                <th class="px-4 py-2 text-left font-medium text-gray-600">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="municipality-table" class="divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Add Board Type Modal -->
     <div id="board-type-modal" class="fixed inset-0 bg-black bg-opacity-50 modal-backdrop hidden flex items-center justify-center z-50">
         <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
@@ -255,11 +307,6 @@
                     <input type="text" id="new-board-type" placeholder="e.g., Digital LED" 
                            class="w-full px-3 py-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
                     <input type="hidden" id="board-type-id">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Rate per sqft (NPR)</label>
-                    <input type="number" id="new-board-rate" min="0" step="0.01" placeholder="0.00" 
-                           class="w-full px-3 py-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
                 </div>
                 <div class="flex space-x-3 pt-4">
                     <button id="save-board-type" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md font-medium transition-colors">
@@ -277,11 +324,68 @@
                         <thead class="bg-gray-50">
                             <tr>
                                 <th class="px-4 py-2 text-left font-medium text-gray-600">Name</th>
-                                <th class="px-4 py-2 text-left font-medium text-gray-600">Rate (NPR/sqft)</th>
                                 <th class="px-4 py-2 text-left font-medium text-gray-600">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="board-type-table" class="divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Set Board Type Rate Modal -->
+    <div id="rate-modal" class="fixed inset-0 bg-black bg-opacity-50 modal-backdrop hidden flex items-center justify-center z:50">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">Set Board Type Rate</h3>
+                <button id="close-rate-modal" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Board Type</label>
+                    <select id="rate-board-type" class="w-full px-3 py-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm">
+                        <option value="">Select Board Type</option>
+                    </select>
+                </div>
+                <div class="relative">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Municipality</label>
+                    <input type="text" id="rate-municipality" placeholder="Enter municipality name to search" 
+                           class="w-full px-3 py-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm">
+                    <div id="rate-municipality-dropdown" class="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto hidden">
+                        <ul id="rate-municipality-list" class="text-sm text-gray-700"></ul>
+                    </div>
+                    <input type="hidden" id="rate-municipality-id">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Rate per sqft (NPR)</label>
+                    <input type="number" id="new-rate" min="0" step="0.01" placeholder="0.00" 
+                           class="w-full px-3 py-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm">
+                </div>
+                <div class="flex space-x-3 pt-4">
+                    <button id="save-rate" class="flex-1 bg-teal-600 hover:bg-teal-700 text-white py-2 px-4 rounded-md font-medium transition-colors">
+                        Save Rate
+                    </button>
+                    <button id="cancel-rate" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 py-2 px-4 rounded-md font-medium transition-colors">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+            <div class="mt-6">
+                <h4 class="text-sm font-medium text-gray-700 mb-2">Existing Rates</h4>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-2 text-left font-medium text-gray-600">Board Type</th>
+                                <th class="px-4 py-2 text-left font-medium text-gray-600">Municipality</th>
+                                <th class="px-4 py-2 text-left font-medium text-gray-600">Rate (NPR/sqft)</th>
+                                <th class="px-4 py-2 text-left font-medium text-gray-600">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rate-table" class="divide-y divide-gray-200"></tbody>
                     </table>
                 </div>
             </div>
@@ -372,6 +476,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const boardFormTitle = document.getElementById('board-form-title');
     const boardIdInput = document.getElementById('board-id');
     const addressInput = document.getElementById('address');
+    const municipalityDropdown = document.getElementById('municipality-dropdown');
+    const municipalityList = document.getElementById('municipality-list');
     const shopNameInput = document.getElementById('shop_name');
     const brandSelect = document.getElementById('brand');
     const boardTypeSelect = document.getElementById('board_type');
@@ -392,16 +498,30 @@ document.addEventListener('DOMContentLoaded', function() {
     const prevPageBtn = document.getElementById('prev-page');
     const nextPageBtn = document.getElementById('next-page');
     const paginationInfo = document.getElementById('pagination-info');
+    const addMunicipalityBtn = document.getElementById('add-municipality-btn');
     const addBoardTypeBtn = document.getElementById('add-board-type-btn');
+    const setRateBtn = document.getElementById('set-rate-btn');
     const addBrandBtn = document.getElementById('add-brand-btn');
+    const municipalityModal = document.getElementById('municipality-modal');
     const boardTypeModal = document.getElementById('board-type-modal');
+    const rateModal = document.getElementById('rate-modal');
     const brandModal = document.getElementById('brand-modal');
     const paymentDiscountModal = document.getElementById('payment-discount-modal');
+    const municipalityModalTitle = document.getElementById('municipality-modal-title');
     const boardTypeModalTitle = document.getElementById('board-type-modal-title');
+    const municipalityIdInput = document.getElementById('municipality-id');
+    const newMunicipalityInput = document.getElementById('new-municipality');
+    const municipalityTable = document.getElementById('municipality-table');
     const boardTypeIdInput = document.getElementById('board-type-id');
     const newBoardTypeInput = document.getElementById('new-board-type');
-    const newBoardRateInput = document.getElementById('new-board-rate');
     const boardTypeTable = document.getElementById('board-type-table');
+    const rateBoardTypeSelect = document.getElementById('rate-board-type');
+    const rateMunicipalityInput = document.getElementById('rate-municipality');
+    const rateMunicipalityIdInput = document.getElementById('rate-municipality-id');
+    const rateMunicipalityDropdown = document.getElementById('rate-municipality-dropdown');
+    const rateMunicipalityList = document.getElementById('rate-municipality-list');
+    const newRateInput = document.getElementById('new-rate');
+    const rateTable = document.getElementById('rate-table');
     const brandClientSelect = document.getElementById('brand-client-select');
     const newBrandNameInput = document.getElementById('new-brand-name');
     const paymentBoardIdInput = document.getElementById('payment-board-id');
@@ -423,18 +543,132 @@ document.addEventListener('DOMContentLoaded', function() {
         totalAmountInput.value = totalAmount < 0 ? '0.00' : totalAmount.toFixed(2);
     }
 
+    // Fetch municipalities for dropdown
+    async function populateMunicipalityDropdown(searchTerm) {
+        try {
+            const response = await fetch(`/client-management/municipalities/?search=${encodeURIComponent(searchTerm)}`);
+            const municipalities = await response.json();
+            municipalityList.innerHTML = '';
+            if (municipalities.length === 0) {
+                municipalityDropdown.classList.add('hidden');
+                return;
+            }
+            municipalities.forEach(municipality => {
+                const li = document.createElement('li');
+                li.className = 'px-4 py-2 hover:bg-gray-100 cursor-pointer';
+                li.textContent = municipality.name;
+                li.dataset.municipalityId = municipality.id;
+                li.addEventListener('click', () => {
+                    addressInput.value = municipality.name;
+                    municipalityIdInput.value = municipality.municipalityId;
+                    municipalityDropdown.classList.add('hidden');
+                    updateRate();
+                });
+                municipalityList.appendChild(li);
+            });
+            municipalityDropdown.classList.remove('hidden');
+        } catch (error) {
+            console.error('Error fetching municipalities:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Failed to load municipalities',
+                timer: 2000,
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
+        }
+    }
+
+    // Fetch municipalities for rate modal dropdown
+    async function populateRateMunicipalityDropdown(searchTerm) {
+        try {
+            const response = await fetch(`/client-management/municipalities/?search=${encodeURIComponent(searchTerm)}`);
+            const municipalities = await response.json();
+            rateMunicipalityList.innerHTML = '';
+            if (municipalities.length === 0) {
+                rateMunicipalityDropdown.classList.add('hidden');
+                return;
+            }
+            municipalities.forEach(municipality => {
+                const li = document.createElement('li');
+                li.className = 'px-4 py-2 hover:bg-gray-100 cursor-pointer';
+                li.textContent = municipality.name;
+                li.dataset.municipalityId = municipality.id;
+                li.addEventListener('click', () => {
+                    rateMunicipalityInput.value = municipality.name;
+                    rateMunicipalityIdInput.value = municipality.id;
+                    rateMunicipalityDropdown.classList.add('hidden');
+                });
+                rateMunicipalityList.appendChild(li);
+            });
+            rateMunicipalityDropdown.classList.remove('hidden');
+        } catch (error) {
+            console.error('Error fetching municipalities:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Failed to load municipalities',
+                timer: 2000,
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
+        }
+    }
+
+    // Update rate based on board type and municipality
+    async function updateRate() {
+        const boardTypeId = boardTypeSelect.value;
+        const municipalityId = municipalityIdInput.value;
+        if (boardTypeId && municipalityId) {
+            try {
+                const response = await fetch(`/client-management/board-type-rate/?board_type_id=${boardTypeId}&municipality_id=${municipalityId}`);
+                const data = await response.json();
+                if (data.success) {
+                    rateInput.value = parseFloat(data.rate).toFixed(2);
+                    calculateAreaAndAmount();
+                } else {
+                    rateInput.value = '0.00';
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'No Rate Found',
+                        text: 'No rate set for this board type and municipality',
+                        timer: 2000,
+                        timerProgressBar: true,
+                        showConfirmButton: false
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching rate:', error);
+                rateInput.value = '0.00';
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to load rate',
+                    timer: 2000,
+                    timerProgressBar: true,
+                    showConfirmButton: false
+                });
+            }
+        } else {
+            rateInput.value = '0.00';
+        }
+        calculateAreaAndAmount();
+    }
+
     // Fetch and update board type dropdown
     async function updateBoardTypeDropdown() {
         try {
             const response = await fetch('/client-management/board-types/');
             const boardTypes = await response.json();
             boardTypeSelect.innerHTML = '<option value="">Select Board Type</option>';
+            rateBoardTypeSelect.innerHTML = '<option value="">Select Board Type</option>';
             boardTypes.forEach(type => {
                 const option = document.createElement('option');
                 option.value = type.id;
-                option.dataset.rate = type.rate;
-                option.textContent = `${type.name} (NPR ${type.rate}/sqft)`;
-                boardTypeSelect.appendChild(option);
+                option.textContent = type.name;
+                boardTypeSelect.appendChild(option.cloneNode(true));
+                rateBoardTypeSelect.appendChild(option);
             });
         } catch (error) {
             console.error('Error fetching board types:', error);
@@ -448,14 +682,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     }
-
-    // Update rate input when board type changes
-    boardTypeSelect.addEventListener('change', function() {
-        const selectedOption = boardTypeSelect.options[boardTypeSelect.selectedIndex];
-        const rate = selectedOption ? parseFloat(selectedOption.dataset.rate) || 0 : 0;
-        rateInput.value = rate.toFixed(2);
-        calculateAreaAndAmount();
-    });
 
     // Fetch and update brand dropdown
     async function updateBrandDropdown(clientId) {
@@ -510,6 +736,93 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Fetch and update municipality table
+    async function updateMunicipalityTable() {
+        try {
+            const response = await fetch('/client-management/municipalities/');
+            const municipalities = await response.json();
+            municipalityTable.innerHTML = '';
+            municipalities.forEach(municipality => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-4 py-2 text-gray-600">${municipality.name}</td>
+                    <td class="px-4 py-2">
+                        <button class="edit-municipality text-blue-600 hover:text-blue-800 mr-2" data-id="${municipality.id}" data-name="${municipality.name}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="delete-municipality text-red-600 hover:text-red-800" data-id="${municipality.id}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                municipalityTable.appendChild(row);
+            });
+            document.querySelectorAll('.edit-municipality').forEach(button => {
+                button.addEventListener('click', () => {
+                    municipalityIdInput.value = button.dataset.id;
+                    newMunicipalityInput.value = button.dataset.name;
+                    municipalityModalTitle.textContent = 'Edit Municipality';
+                });
+            });
+            document.querySelectorAll('.delete-municipality').forEach(button => {
+                button.addEventListener('click', async () => {
+                    if (confirm('Are you sure you want to delete this municipality?')) {
+                        try {
+                            const response = await fetch(`/client-management/municipalities/delete/${button.dataset.id}/`, {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRFToken': '{{ csrf_token }}',
+                                    'Content-Type': 'application/json'
+                                }
+                            });
+                            const data = await response.json();
+                            if (data.success) {
+                                updateMunicipalityTable();
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Deleted',
+                                    text: 'Municipality deleted successfully',
+                                    timer: 1500,
+                                    timerProgressBar: true,
+                                    showConfirmButton: false
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: data.message || 'Failed to delete municipality',
+                                    timer: 2000,
+                                    timerProgressBar: true,
+                                    showConfirmButton: false
+                                });
+                            }
+                        } catch (error) {
+                            console.error('Error deleting municipality:', error);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'Failed to delete municipality',
+                                timer: 2000,
+                                timerProgressBar: true,
+                                showConfirmButton: false
+                            });
+                        }
+                    }
+                });
+            });
+        } catch (error) {
+            console.error('Error fetching municipalities:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Failed to load municipalities',
+                timer: 2000,
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
+        }
+    }
+
     // Fetch and update board type table
     async function updateBoardTypeTable() {
         try {
@@ -520,9 +833,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td class="px-4 py-2 text-gray-600">${type.name}</td>
-                    <td class="px-4 py-2 text-gray-600">NPR ${type.rate}</td>
                     <td class="px-4 py-2">
-                        <button class="edit-board-type text-blue-600 hover:text-blue-800 mr-2" data-id="${type.id}" data-name="${type.name}" data-rate="${type.rate}">
+                        <button class="edit-board-type text-blue-600 hover:text-blue-800 mr-2" data-id="${type.id}" data-name="${type.name}">
                             <i class="fas fa-edit"></i>
                         </button>
                         <button class="delete-board-type text-red-600 hover:text-red-800" data-id="${type.id}">
@@ -536,7 +848,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 button.addEventListener('click', () => {
                     boardTypeIdInput.value = button.dataset.id;
                     newBoardTypeInput.value = button.dataset.name;
-                    newBoardRateInput.value = button.dataset.rate;
                     boardTypeModalTitle.textContent = 'Edit Board Type';
                 });
             });
@@ -600,6 +911,100 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Fetch and update rate table
+    async function updateRateTable() {
+        try {
+            const response = await fetch('/client-management/board-type-rates/');
+            const rates = await response.json();
+            rateTable.innerHTML = '';
+            rates.forEach(rate => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-4 py-2 text-gray-600">${rate.board_type_name}</td>
+                    <td class="px-4 py-2 text-gray-600">${rate.municipality_name}</td>
+                    <td class="px-4 py-2 text-gray-600">NPR ${parseFloat(rate.rate).toFixed(2)}</td>
+                    <td class="px-4 py-2">
+                        <button class="edit-rate text-blue-600 hover:text-blue-800 mr-2" data-board-type-id="${rate.board_type_id}" data-municipality-id="${rate.municipality_id}" data-rate="${rate.rate}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="delete-rate text-red-600 hover:text-red-800" data-board-type-id="${rate.board_type_id}" data-municipality-id="${rate.municipality_id}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                rateTable.appendChild(row);
+            });
+            document.querySelectorAll('.edit-rate').forEach(button => {
+                button.addEventListener('click', () => {
+                    rateBoardTypeSelect.value = button.dataset.boardTypeId;
+                    rateMunicipalityIdInput.value = button.dataset.municipalityId;
+                    rateMunicipalityInput.value = button.parentElement.previousElementSibling.previousElementSibling.textContent;
+                    newRateInput.value = button.dataset.rate;
+                });
+            });
+            document.querySelectorAll('.delete-rate').forEach(button => {
+                button.addEventListener('click', async () => {
+                    if (confirm('Are you sure you want to delete this rate?')) {
+                        try {
+                            const response = await fetch('/client-management/board-type-rates/delete/', {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRFToken': '{{ csrf_token }}',
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    board_type_id: button.dataset.boardTypeId,
+                                    municipality_id: button.dataset.municipalityId
+                                })
+                            });
+                            const data = await response.json();
+                            if (data.success) {
+                                updateRateTable();
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Deleted',
+                                    text: 'Rate deleted successfully',
+                                    timer: 1500,
+                                    timerProgressBar: true,
+                                    showConfirmButton: false
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: data.message || 'Failed to delete rate',
+                                    timer: 2000,
+                                    timerProgressBar: true,
+                                    showConfirmButton: false
+                                });
+                            }
+                        } catch (error) {
+                            console.error('Error deleting rate:', error);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'Failed to delete rate',
+                                timer: 2000,
+                                timerProgressBar: true,
+                                showConfirmButton: false
+                            });
+                        }
+                    }
+                });
+            });
+        } catch (error) {
+            console.error('Error fetching rates:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Failed to load rates',
+                timer: 2000,
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
+        }
+    }
+
     // Fetch boards with pagination
     async function fetchBoards(clientId, page = 1) {
         try {
@@ -651,32 +1056,32 @@ document.addEventListener('DOMContentLoaded', function() {
             const row = document.createElement('tr');
             row.className = 'hover:bg-gray-50 transition-colors';
             row.innerHTML = `
-            <td class="px-4 py-2 text-gray-600 border-b">${board.address}</td>
-            <td class="px-4 py-2 text-gray-600 border-b">${board.shop_name}</td>
-            <td class="px-4 py-2 text-gray-600 border-b">${board.brand_name}</td>
-            <td class="px-4 py-2 border-b">
-                <span class="px-2 py-1 text-xs font-medium rounded-full ${getBoardTypeColor(board.board_type_name)}">${board.board_type_name}</span>
-            </td>
-            <td class="px-4 py-2 text-gray-600 border-b">${parseFloat(board.length).toFixed(2)} × ${parseFloat(board.breadth).toFixed(2)} ft</td>
-            <td class="px-4 py-2 text-gray-600 border-b">${parseFloat(board.area).toFixed(2)} sqft</td>
-            <td class="px-4 py-2 text-gray-600 border-b">${board.quantity}</td>
-            <td class="px-4 py-2 text-gray-600 border-b">NPR ${parseFloat(board.rate).toFixed(2)}</td>
-            <td class="px-4 py-2 text-gray-600 border-b">NPR ${parseFloat(board.discount).toFixed(2)}</td>
-            <td class="px-4 py-2 text-gray-900 font-semibold border-b">NPR ${parseFloat(board.total_amount).toFixed(2)}</td>
-            <td class="px-4 py-2 text-gray-600 border-b">NPR ${parseFloat(board.paid_amount).toFixed(2)}</td>
-            <td class="px-4 py-2 text-gray-600 border-b">${board.status}</td>
-            <td class="px-4 py-2 border-b">
-                <button class="edit-board text-blue-600 hover:text-blue-800 mr-2" data-id="${board.id}">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="delete-board text-red-600 hover:text-red-800 mr-2" data-id="${board.id}">
-                    <i class="fas fa-trash"></i>
-                </button>
-                <button class="apply-payment-discount text-teal-600 hover:text-teal-800" data-id="${board.id}">
-                    <i class="fas fa-dollar-sign"></i>
-                </button>
-            </td>
-        `;
+                <td class="px-4 py-2 text-gray-600 border-b">${board.address}</td>
+                <td class="px-4 py-2 text-gray-600 border-b">${board.shop_name}</td>
+                <td class="px-4 py-2 text-gray-600 border-b">${board.brand_name}</td>
+                <td class="px-4 py-2 border-b">
+                    <span class="px-2 py-1 text-xs font-medium rounded-full ${getBoardTypeColor(board.board_type_name)}">${board.board_type_name}</span>
+                </td>
+                <td class="px-4 py-2 text-gray-600 border-b">${parseFloat(board.length).toFixed(2)} × ${parseFloat(board.breadth).toFixed(2)} ft</td>
+                <td class="px-4 py-2 text-gray-600 border-b">${parseFloat(board.area).toFixed(2)} sqft</td>
+                <td class="px-4 py-2 text-gray-600 border-b">${board.quantity}</td>
+                <td class="px-4 py-2 text-gray-600 border-b">NPR ${parseFloat(board.rate).toFixed(2)}</td>
+                <td class="px-4 py-2 text-gray-600 border-b">NPR ${parseFloat(board.discount).toFixed(2)}</td>
+                <td class="px-4 py-2 text-gray-900 font-semibold border-b">NPR ${parseFloat(board.total_amount).toFixed(2)}</td>
+                <td class="px-4 py-2 text-gray-600 border-b">NPR ${parseFloat(board.paid_amount).toFixed(2)}</td>
+                <td class="px-4 py-2 text-gray-600 border-b">${board.status}</td>
+                <td class="px-4 py-2 border-b">
+                    <button class="edit-board text-blue-600 hover:text-blue-800 mr-2" data-id="${board.id}">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="delete-board text-red-600 hover:text-red-800 mr-2" data-id="${board.id}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    <button class="apply-payment-discount text-teal-600 hover:text-teal-800" data-id="${board.id}">
+                        <i class="fas fa-dollar-sign"></i>
+                    </button>
+                </td>
+            `;
             boardTableBody.appendChild(row);
         });
 
@@ -694,7 +1099,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Update financial summary
     function updateFinancialSummary(summary) {
-        console.log('Financial Summary:', summary); // Debug log to inspect received data
+        console.log('Financial Summary:', summary);
         document.getElementById('total-boards').textContent = summary.total_boards || 0;
         document.getElementById('previous-dues').textContent = (parseFloat(summary.previous_dues) || 0).toFixed(2);
         document.getElementById('total-value').textContent = (parseFloat(summary.current_year_total) || 0).toFixed(2);
@@ -722,6 +1127,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const board = data.board;
                 boardIdInput.value = board.id;
                 addressInput.value = board.address;
+                municipalityIdInput.value = board.municipality_id;
                 shopNameInput.value = board.shop_name;
                 brandSelect.value = board.brand_id;
                 boardTypeSelect.value = board.board_type_id;
@@ -939,6 +1345,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         const boardId = boardIdInput.value;
+        const municipalityId = municipalityIdInput.value;
         const address = addressInput.value.trim();
         const shopName = shopNameInput.value.trim();
         const brandId = brandSelect.value;
@@ -950,11 +1357,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const discount = parseFloat(discountInput.value) || 0;
         const boardImage = boardImageInput.files[0];
 
-        if (!address || !shopName || !brandId || !boardTypeId || length <= 0 || breadth <= 0 || rate <= 0) {
+        if (!municipalityId || !address || !shopName || !brandId || !boardTypeId || length <= 0 || breadth <= 0 || rate <= 0) {
             Swal.fire({
                 icon: 'error',
                 title: 'Incomplete Information',
-                text: 'Please fill in all required fields',
+                text: 'Please fill in all required fields, including selecting a municipality',
                 timer: 2000,
                 timerProgressBar: true,
                 showConfirmButton: false
@@ -964,6 +1371,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const formData = new FormData();
         formData.append('client_id', currentClientId);
+        formData.append('municipality_id', municipalityId);
         formData.append('address', address);
         formData.append('shop_name', shopName);
         formData.append('brand_id', brandId);
@@ -976,7 +1384,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (boardImage) formData.append('image', boardImage);
         if (boardId) formData.append('id', boardId);
 
-        console.log('FormData:', Object.fromEntries(formData)); // Log form data for debugging
+        console.log('FormData:', Object.fromEntries(formData));
 
         try {
             const response = await fetch('/client-management/board/', {
@@ -987,7 +1395,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: formData
             });
             const data = await response.json();
-            console.log('Response:', data); // Log server response
+            console.log('Response:', data);
             if (data.success) {
                 fetchBoards(currentClientId, currentPage);
                 clearForm();
@@ -1022,17 +1430,16 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Apply payment/discount
-    document.getElementById('apply-payment-discount').addEventListener('click', async function() {
-        const boardId = paymentBoardIdInput.value;
-        const payment = parseFloat(paymentAmountInput.value) || 0;
-        const discount = parseFloat(discountAmountInput.value) || 0;
+    // Save municipality
+    document.getElementById('save-municipality').addEventListener('click', async function() {
+        const municipalityId = municipalityIdInput.value;
+        const name = newMunicipalityInput.value.trim();
 
-        if (payment < 0 || discount < 0) {
+        if (!name) {
             Swal.fire({
                 icon: 'error',
                 title: 'Invalid Input',
-                text: 'Payment and discount cannot be negative',
+                text: 'Please enter a municipality name',
                 timer: 2000,
                 timerProgressBar: true,
                 showConfirmButton: false
@@ -1040,33 +1447,29 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        const payload = {
-            board_id: boardId,
-            payment_amount: payment,
-            discount_amount: discount
-        };
-        console.log('Payment/Discount Payload:', payload); // Log payload
-
         try {
-            const response = await fetch('/client-management/board/apply-payment-discount/', {
+            const response = await fetch('/client-management/municipalities/', {
                 method: 'POST',
                 headers: {
-                    'X-CSRFToken': '{{ csrf_token }}',
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
                 },
-                body: JSON.stringify(payload)
+                body: JSON.stringify({
+                    id: municipalityId,
+                    name: name
+                })
             });
             const data = await response.json();
-            console.log('Response:', data); // Log response
             if (data.success) {
-                fetchBoards(currentClientId, currentPage);
-                paymentDiscountModal.classList.add('hidden');
-                paymentAmountInput.value = '';
-                discountAmountInput.value = '';
+                updateMunicipalityTable();
+                municipalityModal.classList.add('hidden');
+                municipalityIdInput.value = '';
+                newMunicipalityInput.value = '';
+                municipalityModalTitle.textContent = 'Add Municipality';
                 Swal.fire({
                     icon: 'success',
-                    title: 'Applied',
-                    text: 'Payment/Discount applied successfully',
+                    title: municipalityId ? 'Municipality Updated' : 'Municipality Added',
+                    text: `${name} has been ${municipalityId ? 'updated' : 'added'} successfully`,
                     timer: 1500,
                     timerProgressBar: true,
                     showConfirmButton: false
@@ -1075,18 +1478,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: data.message || 'Failed to apply payment/discount',
+                    text: data.message || 'Failed to save municipality',
                     timer: 2000,
                     timerProgressBar: true,
                     showConfirmButton: false
                 });
             }
         } catch (error) {
-            console.error('Error applying payment/discount:', error);
+            console.error('Error saving municipality:', error);
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: 'Failed to apply payment/discount',
+                text: 'Failed to save municipality',
                 timer: 2000,
                 timerProgressBar: true,
                 showConfirmButton: false
@@ -1094,132 +1497,16 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Clear form
-    function clearForm() {
-        boardIdInput.value = '';
-        addressInput.value = '';
-        shopNameInput.value = '';
-        brandSelect.value = '';
-        boardTypeSelect.value = '';
-        lengthFeetInput.value = '';
-        breadthFeetInput.value = '';
-        quantityInput.value = '1';
-        rateInput.value = '';
-        discountInput.value = '';
-        boardImageInput.value = '';
-        totalAreaInput.value = '';
-        totalAmountInput.value = '';
-        boardFormTitle.textContent = 'Add Board Details';
-        saveBoardBtn.querySelector('span').textContent = 'Save Board';
-    }
-
-    clearFormBtn.addEventListener('click', clearForm);
-
-    // Search client event listeners
-    searchClientBtn.addEventListener('click', () => {
-        const clientId = clientIdInput.value.trim();
-        searchClient(clientId);
-    });
-
-    clientIdInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            searchClient(clientIdInput.value.trim());
-        }
-    });
-
-    clientNameInput.addEventListener('input', () => {
-        const searchTerm = clientNameInput.value.trim();
-        populateClientDropdown(searchTerm);
-    });
-
-    clientNameInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            const firstClient = clientList.querySelector('li');
-            if (firstClient) {
-                searchClient(firstClient.dataset.clientId);
-            }
-        }
-    });
-
-    document.addEventListener('click', (e) => {
-        if (!clientDropdown.contains(e.target) && e.target !== clientNameInput) {
-            clientDropdown.classList.add('hidden');
-        }
-    });
-
-    // Pagination event listeners
-    prevPageBtn.addEventListener('click', () => {
-        if (currentPage > 1) {
-            fetchBoards(currentClientId, currentPage - 1);
-        }
-    });
-
-    nextPageBtn.addEventListener('click', () => {
-        fetchBoards(currentClientId, currentPage + 1);
-    });
-
-    // Real-time calculation
-    [lengthFeetInput, breadthFeetInput, quantityInput, rateInput, discountInput].forEach(input => {
-        input.addEventListener('input', calculateAreaAndAmount);
-    });
-
-    // Modal functionality
-    addBoardTypeBtn.addEventListener('click', function() {
-        boardTypeModal.classList.remove('hidden');
-        boardTypeModalTitle.textContent = 'Add Board Type';
-        boardTypeIdInput.value = '';
-        newBoardTypeInput.value = '';
-        newBoardRateInput.value = '';
-        updateBoardTypeTable();
-    });
-
-    addBrandBtn.addEventListener('click', function() {
-        brandModal.classList.remove('hidden');
-        updateBrandClientSelect();
-    });
-
-    document.getElementById('close-board-type-modal').addEventListener('click', function() {
-        boardTypeModal.classList.add('hidden');
-    });
-
-    document.getElementById('close-brand-modal').addEventListener('click', function() {
-        brandModal.classList.add('hidden');
-    });
-
-    document.getElementById('close-payment-discount-modal').addEventListener('click', function() {
-        paymentDiscountModal.classList.add('hidden');
-    });
-
-    document.getElementById('cancel-board-type').addEventListener('click', function() {
-        boardTypeModal.classList.add('hidden');
-        boardTypeIdInput.value = '';
-        newBoardTypeInput.value = '';
-        newBoardRateInput.value = '';
-        boardTypeModalTitle.textContent = 'Add Board Type';
-    });
-
-    document.getElementById('cancel-brand').addEventListener('click', function() {
-        brandModal.classList.add('hidden');
-        brandClientSelect.value = '';
-        newBrandNameInput.value = '';
-    });
-
-    document.getElementById('cancel-payment-discount').addEventListener('click', function() {
-        paymentDiscountModal.classList.add('hidden');
-        paymentAmountInput.value = '';
-        discountAmountInput.value = '';
-    });
-
+    // Save board type
     document.getElementById('save-board-type').addEventListener('click', async function() {
         const boardTypeId = boardTypeIdInput.value;
         const typeName = newBoardTypeInput.value.trim();
-        const typeRate = parseFloat(newBoardRateInput.value);
 
-        if (!typeName || !typeRate || typeRate <= 0) {
+        if (!typeName) {
             Swal.fire({
                 icon: 'error',
                 title: 'Invalid Input',
-                text: 'Please enter a valid board type name and rate',
+                text: 'Please enter a valid board type name',
                 timer: 2000,
                 timerProgressBar: true,
                 showConfirmButton: false
@@ -1236,8 +1523,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 body: JSON.stringify({
                     id: boardTypeId,
-                    name: typeName,
-                    rate: typeRate
+                    name: typeName
                 })
             });
             const data = await response.json();
@@ -1247,7 +1533,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 boardTypeModal.classList.add('hidden');
                 boardTypeIdInput.value = '';
                 newBoardTypeInput.value = '';
-                newBoardRateInput.value = '';
                 boardTypeModalTitle.textContent = 'Add Board Type';
                 Swal.fire({
                     icon: 'success',
@@ -1280,87 +1565,445 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    document.getElementById('save-brand').addEventListener('click', async function() {
-    const clientId = brandClientSelect.value;
-    const brandName = newBrandNameInput.value.trim();
+    // Save rate
+    document.getElementById('save-rate').addEventListener('click', async function() {
+        const boardTypeId = rateBoardTypeSelect.value;
+        const municipalityId = rateMunicipalityIdInput.value;
+        const rate = parseFloat(newRateInput.value) || 0;
 
-    if (!clientId || !brandName) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Invalid Input',
-            text: 'Please select a client and enter a brand name',
-            timer: 2000,
-            timerProgressBar: true,
-            showConfirmButton: false
-        });
-        return;
-    }
-
-    try {
-        const response = await fetch('/client-management/brands/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}'
-            },
-            body: JSON.stringify({
-                client_id: clientId,
-                name: brandName
-            })
-        });
-        const data = await response.json();
-        if (data.success) {
-            brandModal.classList.add('hidden');
-            if (currentClientId === clientId) {
-                updateBrandDropdown(clientId);
-            }
-            brandClientSelect.value = '';
-            newBrandNameInput.value = '';
+        if (!boardTypeId || !municipalityId || rate <= 0) {
             Swal.fire({
-                icon: 'success',
-                title: 'Brand Added',
-                text: `${brandName} has been added successfully`,
-                timer: 1500,
+                icon: 'error',
+                title: 'Invalid Input',
+                text: 'Please select a board type, municipality, and enter a valid rate',
+                timer: 2000,
                 timerProgressBar: true,
                 showConfirmButton: false
             });
-        } else {
+            return;
+        }
+
+        try {
+            const response = await fetch('/client-management/board-type-rates/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    board_type_id: boardTypeId,
+                    municipality_id: municipalityId,
+                    rate: rate
+                })
+            });
+            const data = await response.json();
+            if (data.success) {
+                updateRateTable();
+                rateModal.classList.add('hidden');
+                rateBoardTypeSelect.value = '';
+                rateMunicipalityIdInput.value = '';
+                rateMunicipalityInput.value = '';
+                newRateInput.value = '';
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Rate Set',
+                    text: 'Rate has been set successfully',
+                    timer: 1500,
+                    timerProgressBar: true,
+                    showConfirmButton: false
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: data.message || 'Failed to save rate',
+                    timer: 2000,
+                    timerProgressBar: true,
+                    showConfirmButton: false
+                });
+            }
+        } catch (error) {
+            console.error('Error saving rate:', error);
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: data.message || 'Failed to save brand',
+                text: 'Failed to save rate',
                 timer: 2000,
                 timerProgressBar: true,
                 showConfirmButton: false
             });
         }
-    } catch (error) {
-        console.error('Error saving brand:', error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Failed to save brand',
-            timer: 2000,
-            timerProgressBar: true,
-            showConfirmButton: false
-        });
+    });
+
+// Apply payment/discount
+    document.getElementById('apply-payment-discount').addEventListener('click', async function() {
+        const boardId = paymentBoardIdInput.value;
+        const payment = parseFloat(paymentAmountInput.value) || 0;
+        const discount = parseFloat(discountAmountInput.value) || 0;
+
+        if (payment < 0 || discount < 0) {
+            Swal.fire({                icon: 'error',
+                title: 'Invalid Input',
+                text: 'Payment and discount amounts cannot be negative',
+                timer: 2000,
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
+            return;
+        }
+
+        try {
+            const response = await fetch('/client-management/apply-payment-discount/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    board_id: boardId,
+                    payment_amount: payment,
+                    discount_amount: discount
+                })
+            });
+            const data = await response.json();
+            if (data.success) {
+                paymentDiscountModal.classList.add('hidden');
+                paymentBoardIdInput.value = '';
+                paymentAmountInput.value = '';
+                discountAmountInput.value = '';
+                fetchBoards(currentClientId, currentPage);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: 'Payment/Discount applied successfully',
+                    timer: 1500,
+                    timerProgressBar: true,
+                    showConfirmButton: false
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: data.message || 'Failed to apply payment/discount',
+                    timer: 2000,
+                    timerProgressBar: true,
+                    showConfirmButton: false
+                });
+            }
+        } catch (error) {
+            console.error('Error applying payment/discount:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Failed to apply payment/discount',
+                timer: 2000,
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
+        }
+    });
+
+    // Save brand
+    document.getElementById('save-brand').addEventListener('click', async function() {
+        const clientId = brandClientSelect.value;
+        const brandName = newBrandNameInput.value.trim();
+
+        if (!clientId || !brandName) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid Input',
+                text: 'Please select a client and enter a brand name',
+                timer: 2000,
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
+            return;
+        }
+
+        try {
+            const response = await fetch('/client-management/brands/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    client_id: clientId,
+                    name: brandName
+                })
+            });
+            const data = await response.json();
+            if (data.success) {
+                brandModal.classList.add('hidden');
+                brandClientSelect.value = '';
+                newBrandNameInput.value = '';
+                if (currentClientId) {
+                    updateBrandDropdown(currentClientId);
+                }
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Brand Added',
+                    text: `${brandName} has been added successfully`,
+                    timer: 1500,
+                    timerProgressBar: true,
+                    showConfirmButton: false
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: data.message || 'Failed to save brand',
+                    timer: 2000,
+                    timerProgressBar: true,
+                    showConfirmButton: false
+                });
+            }
+        } catch (error) {
+            console.error('Error saving brand:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Failed to save brand',
+                timer: 2000,
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
+        }
+    });
+
+    // Clear form
+    clearFormBtn.addEventListener('click', function() {
+        clearForm();
+    });
+
+    function clearForm() {
+        boardIdInput.value = '';
+        addressInput.value = '';
+        municipalityIdInput.value = '';
+        shopNameInput.value = '';
+        brandSelect.value = '';
+        boardTypeSelect.value = '';
+        lengthFeetInput.value = '';
+        breadthFeetInput.value = '';
+        quantityInput.value = '1';
+        rateInput.value = '0.00';
+        discountInput.value = '0.00';
+        boardImageInput.value = '';
+        totalAreaInput.value = '';
+        totalAmountInput.value = '';
+        boardFormTitle.textContent = 'Add Board Details';
+        saveBoardBtn.querySelector('span').textContent = 'Save Board';
+        municipalityDropdown.classList.add('hidden');
     }
-});
 
+    // Client search input
+    clientNameInput.addEventListener('input', function() {
+        const searchTerm = this.value.trim();
+        if (searchTerm.length > 0) {
+            populateClientDropdown(searchTerm);
+        } else {
+            clientDropdown.classList.add('hidden');
+        }
+    });
 
-    function getBoardTypeColor(type) {
+    // Municipality search input
+    addressInput.addEventListener('input', function() {
+        const searchTerm = this.value.trim();
+        if (searchTerm.length > 0) {
+            populateMunicipalityDropdown(searchTerm);
+        } else {
+            municipalityDropdown.classList.add('hidden');
+        }
+    });
+
+    // Rate municipality search input
+    rateMunicipalityInput.addEventListener('input', function() {
+        const searchTerm = this.value.trim();
+        if (searchTerm.length > 0) {
+            populateRateMunicipalityDropdown(searchTerm);
+        } else {
+            rateMunicipalityDropdown.classList.add('hidden');
+        }
+    });
+
+    // Update rate on board type or municipality change
+    boardTypeSelect.addEventListener('change', updateRate);
+    addressInput.addEventListener('change', updateRate);
+
+    // Calculate area and amount on input change
+    lengthFeetInput.addEventListener('input', calculateAreaAndAmount);
+    breadthFeetInput.addEventListener('input', calculateAreaAndAmount);
+    quantityInput.addEventListener('input', calculateAreaAndAmount);
+    discountInput.addEventListener('input', calculateAreaAndAmount);
+
+    // Search client button
+    searchClientBtn.addEventListener('click', function() {
+        const clientId = clientIdInput.value.trim();
+        if (clientId) {
+            searchClient(clientId);
+        } else {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Missing Client ID',
+                text: 'Please enter a client ID or select a client from the dropdown',
+                timer: 2000,
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
+        }
+    });
+
+    // Pagination buttons
+    prevPageBtn.addEventListener('click', function() {
+        if (currentPage > 1) {
+            fetchBoards(currentClientId, currentPage - 1);
+        }
+    });
+
+    nextPageBtn.addEventListener('click', function() {
+        fetchBoards(currentClientId, currentPage + 1);
+    });
+
+    // Modal controls
+    addMunicipalityBtn.addEventListener('click', function() {
+        municipalityModal.classList.remove('hidden');
+        updateMunicipalityTable();
+    });
+
+    addBoardTypeBtn.addEventListener('click', function() {
+        boardTypeModal.classList.remove('hidden');
+        updateBoardTypeTable();
+    });
+
+    setRateBtn.addEventListener('click', function() {
+        rateModal.classList.remove('hidden');
+        updateRateTable();
+    });
+
+    addBrandBtn.addEventListener('click', function() {
+        brandModal.classList.remove('hidden');
+        updateBrandClientSelect();
+    });
+
+    document.getElementById('close-municipality-modal').addEventListener('click', function() {
+        municipalityModal.classList.add('hidden');
+        municipalityIdInput.value = '';
+        newMunicipalityInput.value = '';
+        municipalityModalTitle.textContent = 'Add Municipality';
+    });
+
+    document.getElementById('cancel-municipality').addEventListener('click', function() {
+        municipalityModal.classList.add('hidden');
+        municipalityIdInput.value = '';
+        newMunicipalityInput.value = '';
+        municipalityModalTitle.textContent = 'Add Municipality';
+    });
+
+    document.getElementById('close-board-type-modal').addEventListener('click', function() {
+        boardTypeModal.classList.add('hidden');
+        boardTypeIdInput.value = '';
+        newBoardTypeInput.value = '';
+        boardTypeModalTitle.textContent = 'Add Board Type';
+    });
+
+    document.getElementById('cancel-board-type').addEventListener('click', function() {
+        boardTypeModal.classList.add('hidden');
+        boardTypeIdInput.value = '';
+        newBoardTypeInput.value = '';
+        boardTypeModalTitle.textContent = 'Add Board Type';
+    });
+
+    document.getElementById('close-rate-modal').addEventListener('click', function() {
+        rateModal.classList.add('hidden');
+        rateBoardTypeSelect.value = '';
+        rateMunicipalityIdInput.value = '';
+        rateMunicipalityInput.value = '';
+        newRateInput.value = '';
+    });
+
+    document.getElementById('cancel-rate').addEventListener('click', function() {
+        rateModal.classList.add('hidden');
+        rateBoardTypeSelect.value = '';
+        rateMunicipalityIdInput.value = '';
+        rateMunicipalityInput.value = '';
+        newRateInput.value = '';
+    });
+
+    document.getElementById('close-brand-modal').addEventListener('click', function() {
+        brandModal.classList.add('hidden');
+        brandClientSelect.value = '';
+        newBrandNameInput.value = '';
+    });
+
+    document.getElementById('cancel-brand').addEventListener('click', function() {
+        brandModal.classList.add('hidden');
+        brandClientSelect.value = '';
+        newBrandNameInput.value = '';
+    });
+
+    document.getElementById('close-payment-discount-modal').addEventListener('click', function() {
+        paymentDiscountModal.classList.add('hidden');
+        paymentBoardIdInput.value = '';
+        paymentAmountInput.value = '';
+        discountAmountInput.value = '';
+    });
+
+    document.getElementById('cancel-payment-discount').addEventListener('click', function() {
+        paymentDiscountModal.classList.add('hidden');
+        paymentBoardIdInput.value = '';
+        paymentAmountInput.value = '';
+        discountAmountInput.value = '';
+    });
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function(event) {
+        if (!clientNameInput.contains(event.target) && !clientDropdown.contains(event.target)) {
+            clientDropdown.classList.add('hidden');
+        }
+        if (!addressInput.contains(event.target) && !municipalityDropdown.contains(event.target)) {
+            municipalityDropdown.classList.add('hidden');
+        }
+        if (!rateMunicipalityInput.contains(event.target) && !rateMunicipalityDropdown.contains(event.target)) {
+            rateMunicipalityDropdown.classList.add('hidden');
+        }
+    });
+
+    // Board type color function
+    function getBoardTypeColor(boardType) {
         const colors = {
-            'Flex': 'bg-blue-100 text-blue-800',
-            '3D': 'bg-green100 text-green-800',
-            'Neon': 'bg-purple-100 text-purple-800',
-            'LED': 'bg-yellow-100 text-yellow-800'
+            'Digital LED': 'bg-blue-100 text-blue-800',
+            'Billboard': 'bg-green-100 text-green-800',
+            'Poster': 'bg-yellow-100 text-yellow-800',
+            'Wall Painting': 'bg-purple-100 text-purple-800'
         };
-        return colors[type] || 'bg-gray-100 text-gray-800';
+        return colors[boardType] || 'bg-gray-100 text-gray-800';
     }
 
-    // Initialize board type dropdown
+    // Initialize dropdowns
     updateBoardTypeDropdown();
-    window.deleteBoard = deleteBoard;
 });
 </script>
+
+<style>
+.modal-backdrop {
+    backdrop-filter: blur(4px);
+}
+table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+th, td {
+    border-bottom: 1px solid #e5e7eb;
+}
+th:first-child, td:first-child {
+    border-left: 1px solid #e5e7eb;
+}
+th:last-child, td:last-child {
+    border-right: 1px solid #e5e7eb;
+}
+th {
+    border-top: 1px solid #e5e7eb;
+}
+</style>
+
 {% endblock %}

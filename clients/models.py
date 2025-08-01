@@ -118,9 +118,19 @@ class Client(models.Model):
     def __str__(self):
         return self.name
 
+class Municipality(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Municipality"
+        verbose_name_plural = "Municipalities"
+
+    def __str__(self):
+        return self.name
+
 class BoardType(models.Model):
     name = models.CharField(max_length=100)
-    rate = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
     fiscal_year = models.ForeignKey(FiscalYear, on_delete=models.CASCADE, related_name='board_types')
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -131,6 +141,21 @@ class BoardType(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.fiscal_year.name})"
+
+class BoardTypeRate(models.Model):
+    board_type = models.ForeignKey(BoardType, on_delete=models.CASCADE, related_name='rates')
+    municipality = models.ForeignKey(Municipality, on_delete=models.CASCADE, related_name='board_type_rates')
+    rate = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('board_type', 'municipality')
+        verbose_name = "Board Type Rate"
+        verbose_name_plural = "Board Type Rates"
+
+    def __str__(self):
+        return f"{self.board_type.name} - {self.municipality.name}: {self.rate}"
+    
 
 class Brand(models.Model):
     name = models.CharField(max_length=100)

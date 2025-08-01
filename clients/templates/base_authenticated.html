@@ -71,12 +71,7 @@
                     </button>
                 </div>
                 <nav class="hidden md:flex items-center space-x-4">
-                    <a href="{% url 'dashboard' %}" class="hover:text-teal-200">Dashboard</a>
-                    <a href="{% url 'client_list' %}" class="hover:text-teal-200">Clients</a>
-                    <a href="{% url 'client_management' %}" class="hover:text-teal-200">Client Management</a>
-                    <a href="{% url 'payment_management' %}" class="hover:text-teal-200">Payment </a>
-                    <a href="{% url 'office_management' %}" class="hover:text-teal-200">Staff</a>
-                    <a href="{% url 'fiscal_year_management' %}" class="hover:text-teal-200">Fiscal Year</a>
+                    
                     <a href="{% url 'logout' %}" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md">Logout</a>
                 </nav>
             </div>
@@ -111,7 +106,7 @@
                     <li><a href="{% url 'client_list' %}"><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0z"/></svg>Clients</a></li>
                     <li><a href="{% url 'client_management' %}"><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zM6 10a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>Client Management</a></li>
                     <li><a href="{% url 'payment_management' %}"><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zM6 10a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>Payment Management</a></li>
-                    <li><a href="{% url 'office_management' %}"><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v12h14V5a2 2 0 00-2-2H5zm4 4h2v2H9V7z"/></svg>Staff</a></li>
+                    <li><a href="{% url 'office_management' %}"><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v12h14V5a2 2 0 00-2-2H5zm4 4h2v2H9V7z"/></svg>User</a></li>
                     <li><a href="{% url 'reports_management' %}"><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v12h14V5a2 2 0 00-2-2H5zm4 4h2v2H9V7z"/></svg>reports</a></li>
                      <li><a href="{% url 'excel_upload' %}"><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v12h14V5a2 2 0 00-2-2H5zm4 4h2v2H9V7z"/></svg>Uploads</a></li>
                     <li><a href="{% url 'settings' %}"><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v12h14V5a2 2 0 00-2-2H5zm4 4h2v2H9V7z"/></svg>Settings</a></li>
